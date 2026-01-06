@@ -109,7 +109,6 @@ The installer automatically detects:
 
 - **Auto** - Wipe entire disk and auto-partition
 - **Manual** - Choose specific partitions
-- **Advanced** - Preserve /home, custom fstab
 
 **Partitioning schemes:**
 
@@ -133,11 +132,6 @@ The installer automatically detects:
 /dev/sda2  40GB    ext4    /
 /dev/sda3  Rest    ext4    /home
 ```
-
-**Encryption:**
-
-- LUKS encryption available for root partition
-- You'll set encryption password during setup
 
 **Filesystem options:**
 
@@ -258,7 +252,7 @@ The installer automatically detects:
 - **Minimal** - Firefox, git, vim, htop
 - **Standard** - + office suite, media player, chat
 - **Full** - + gaming, development tools
-- **Custom** - Pick individual packages
+- **Custom** - Pick individual packages (NOT CURRENTLY WORKING)
 
 **Package categories:**
 
@@ -535,9 +529,6 @@ A: It's designed for intermediate users familiar with Linux. Beginners can use i
 
 **Q: How do I update?**  
 A: `sudo pacman -Syu` - rolling release model, always latest packages.
-
-**Q: Can I contribute?**  
-A: Absolutely! See [CONTRIBUTING.md](docs/CONTRIBUTING.md).
 
 ---
 
