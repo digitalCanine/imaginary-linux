@@ -98,29 +98,40 @@ select_from_category() {
   echo -e "${BLUE}═══ $category_name ═══${NC}"
   echo ""
 
-  local index=1
-  local pkg_names=()
+  # Check if category has items
+  if [ ${#category[@]} -eq 0 ]; then
+    print_warning "No packages in this category"
+    return 0
+  fi
 
+  local index=1
+  local -a pkg_names=()
+
+  # Use array iteration instead
   for pkg in "${!category[@]}"; do
-    echo "  $index) $pkg"
-    echo "     ${category[$pkg]}"
+    printf "  %d) %s\n" "$index" "$pkg"
+    printf "     %s\n" "${category[$pkg]}"
     echo ""
     pkg_names+=("$pkg")
     ((index++))
   done
+
   echo "  0) Skip this category"
   echo "  a) Install all from this category"
   echo ""
 
   read -p "Select packages (space-separated numbers, 'a' for all, or '0' to skip): " selection
 
-  if [ "$selection" = "0" ]; then
+  # Handle empty input
+  if [ -z "$selection" ] || [ "$selection" = "0" ]; then
     return 0
-  elif [ "$selection" = "a" ] || [ "$selection" = "A" ]; then
+  fi
+
+  if [ "$selection" = "a" ] || [ "$selection" = "A" ]; then
     selected_packages=("${pkg_names[@]}")
   else
     for num in $selection; do
-      if [[ "$num" =~ ^[0-9]+$ ]] && [ "$num" -gt 0 ] && [ "$num" -lt "$index" ]; then
+      if [[ "$num" =~ ^[0-9]+$ ]] && [ "$num" -gt 0 ] && [ "$num" -le "${#pkg_names[@]}" ]; then
         selected_packages+=("${pkg_names[$((num - 1))]}")
       fi
     done
@@ -299,6 +310,26 @@ install_full() {
 
 install_custom() {
   print_info "Custom package selection..."
+
+  # Debug: Check if arrays are populated
+  print_info "Checking package categories..."
+  echo "  Browsers: ${#BROWSERS[@]} items"
+  echo "  Terminals: ${#TERMINALS[@]} items"
+  echo "  Editors: ${#EDITORS[@]} items"
+  echo "  File Managers: ${#FILE_MANAGERS[@]} items"
+  echo "  Media Players: ${#MEDIA_PLAYERS[@]} items"
+  echo "  Graphics: ${#GRAPHICS[@]} items"
+  echo "  Communication: ${#COMMUNICATION[@]} items"
+  echo "  Development: ${#DEVELOPMENT[@]} items"
+  echo "  Productivity: ${#PRODUCTIVITY[@]} items"
+  echo "  Gaming: ${#GAMING[@]} items"
+  echo "  Utilities: ${#UTILITIES[@]} items"
+  echo ""
+
+  if [ ${#BROWSERS[@]} -eq 0 ]; then
+    print_error "Package arrays are empty! This is a bug."
+    return 1
+  fi
 
   local all_packages=()
 
