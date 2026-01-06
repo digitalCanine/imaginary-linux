@@ -1,6 +1,6 @@
 #!/bin/bash
 # Imaginary Linux Installer
-# Version 1.0.0 (Shamshel)
+# Version 1.1.6 (Shamshel)
 # Main installer orchestrator
 
 set -e # Exit on error
@@ -58,7 +58,7 @@ show_banner() {
 ▒                          ▒
 
     IMAGINARY LINUX
-    Version 1.0.0 (Shamshel)
+    Version 1.1.6 (Shamshel)
     
     A transformative Arch-based system
     with guardian philosophy built-in
@@ -186,8 +186,8 @@ PRETTY_NAME="Imaginary Linux"
 ID=imaginary
 ID_LIKE=arch
 BUILD_ID=rolling
-VERSION="1.1.0"
-VERSION_ID="1.1.0"
+VERSION="1.1.6"
+VERSION_ID="1.1.6"
 VERSION_CODENAME=shamshel
 ANSI_COLOR="38;2;139;69;255"
 HOME_URL="https://github.com/digitalcanine/imaginary-linux"
@@ -203,14 +203,14 @@ EOF
   # Install lsb-release
   cat >/mnt/etc/lsb-release <<'EOF'
 DISTRIB_ID=Imaginary
-DISTRIB_RELEASE=1.0.0
+DISTRIB_RELEASE=1.1.6
 DISTRIB_CODENAME=shamshel
 DISTRIB_DESCRIPTION="Imaginary Linux"
 EOF
 
   # Install imaginary-release
   cat >/mnt/etc/imaginary-release <<'EOF'
-IMAGINARY_VERSION="1.1.0"
+IMAGINARY_VERSION="1.1.6"
 IMAGINARY_CODENAME="Shamshel"
 IMAGINARY_ANGEL="Shamshel"
 IMAGINARY_BUILD_DATE="2026-01-07"
@@ -270,14 +270,15 @@ EOF
       "format": "\u001b[1m\u001b[38;2;225;196;125m✧ IMAGINARY SYSTEM ✧\u001b[0m"
     },
     {
-      "type": "custom",
-      "format": "\u001b[38;2;225;196;125mVersion\u001b[0m: \u001b[38;2;254;255;211m{version} · {codename}\u001b[0m"
+      "type": "os",
+      "key": "\u001b[38;2;225;196;125mVersion\u001b[0m",
+      "format": "{version} · {codename}"
     },
     "break",
     {
       "type": "os",
       "key": "\u001b[38;2;119;130;132mOS\u001b[0m",
-      "format": "Imaginary Linux"
+      "format": "{name}"
     },
     {
       "type": "kernel",
@@ -335,7 +336,7 @@ EOF
 ▒                          ▒
 
        IMAGINARY LINUX
-    Version 1.0.0 (Shamshel)
+    Version 1.1.6 (Shamshel)
 
 Welcome to Imaginary Linux - A transformative Arch-based system
 Documentation: https://github.com/digitalcanine/imaginary-linux
