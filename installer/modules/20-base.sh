@@ -44,15 +44,27 @@ update_mirrorlist() {
   # Backup original mirrorlist
   cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup
 
+  # Update package database first
+  print_info "Updating package database..."
+  pacman -Sy
+
   # Ask user if they want to use reflector for fastest mirrors
   echo ""
   read -p "Optimize mirrorlist for fastest mirrors? (Y/n): " -n 1 -r
   echo
 
   if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+    # Install reflector if not present
+    if ! command -v reflector &>/dev/null; then
+      print_info "Installing reflector..."
+      pacman -S --noconfirm reflector
+    fi
+
     if command -v reflector &>/dev/null; then
-      print_info "Running reflector to find fastest mirrors..."
-      reflector --latest 20 --protocol https --sort rate --save /etc/pacman.d/mirrorlist
+      print_info "Running reflector to find fastest mirrors (this may take a minute)..."
+      reflector --latest 20 --protocol https --sort rate --save /etc/pacman.d/mirrorlist || {
+        print_warning "Reflector failed, using default mirrorlist"
+      }
       print_success "Mirrorlist optimized"
     else
       print_warning "Reflector not available, using default mirrorlist"
@@ -60,6 +72,9 @@ update_mirrorlist() {
   else
     print_info "Using default mirrorlist"
   fi
+
+  # Update package database again with new mirrors
+  pacman -Sy
 }
 
 install_base_packages() {

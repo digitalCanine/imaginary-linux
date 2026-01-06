@@ -1,6 +1,7 @@
 #!/bin/bash
 # Module 10: Disk Partitioning and Setup
 # Handles disk selection, partitioning, formatting, and mounting
+# Supports multiple disks and custom mount points
 
 # Colors
 RED='\033[0;31m'
@@ -25,6 +26,10 @@ print_warning() {
 print_error() {
   echo -e "${RED}[✗]${NC} $1"
 }
+
+# Array to store additional disks
+declare -a ADDITIONAL_DISKS
+declare -a ADDITIONAL_MOUNT_POINTS
 
 list_disks() {
   print_info "Available disks:"
@@ -63,6 +68,90 @@ select_disk() {
       print_info "Disk selection cancelled"
     fi
   done
+}
+
+select_additional_disks() {
+  echo ""
+  print_info "Do you have additional disks to mount?"
+  print_info "These can be used for /home, storage, etc."
+  echo ""
+
+  read -p "Configure additional disks? (y/N): " -n 1 -r
+  echo
+
+  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+    return 0
+  fi
+
+  while true; do
+    list_disks
+
+    read -p "Enter additional disk (or 'done' to finish): " disk_name
+
+    if [ "$disk_name" = "done" ]; then
+      break
+    fi
+
+    local additional_disk="/dev/$disk_name"
+
+    if [ ! -b "$additional_disk" ]; then
+      print_error "Disk $additional_disk does not exist"
+      continue
+    fi
+
+    if [ "$additional_disk" = "$DISK" ]; then
+      print_error "This is already your main installation disk"
+      continue
+    fi
+
+    # Show disk info
+    echo ""
+    print_info "Selected additional disk: $additional_disk"
+    lsblk "$additional_disk"
+    echo ""
+
+    # Get mount point
+    print_info "Enter mount point for this disk"
+    print_info "Examples: /home, /mnt/storage, /mnt/data"
+    read -p "Mount point: " mount_point
+
+    # Validate mount point
+    if [ -z "$mount_point" ]; then
+      print_error "Mount point cannot be empty"
+      continue
+    fi
+
+    if [[ ! "$mount_point" =~ ^/ ]]; then
+      print_error "Mount point must start with /"
+      continue
+    fi
+
+    print_warning "ALL DATA ON $additional_disk WILL BE ERASED!"
+    read -p "Format $additional_disk and mount at $mount_point? (y/N): " -n 1 -r
+    echo
+
+    if [[ $REPLY =~ ^[Yy]$ ]]; then
+      ADDITIONAL_DISKS+=("$additional_disk")
+      ADDITIONAL_MOUNT_POINTS+=("$mount_point")
+      print_success "Added: $additional_disk → $mount_point"
+    fi
+
+    echo ""
+    read -p "Add another disk? (y/N): " -n 1 -r
+    echo
+
+    if [[ ! $REPLY =~ ^[Yy]$ ]]; then
+      break
+    fi
+  done
+
+  if [ ${#ADDITIONAL_DISKS[@]} -gt 0 ]; then
+    echo ""
+    print_info "Additional disks to be configured:"
+    for i in "${!ADDITIONAL_DISKS[@]}"; do
+      echo "  ${ADDITIONAL_DISKS[$i]} → ${ADDITIONAL_MOUNT_POINTS[$i]}"
+    done
+  fi
 }
 
 select_partitioning_mode() {
@@ -208,26 +297,26 @@ auto_partition_uefi() {
     parted -s "$DISK" mkpart primary ext4 ${swap_end}MiB 100%
 
     # Set partition variables
-    EFI_PART="${DISK}1"
-    SWAP_PART="${DISK}2"
-    ROOT_PART="${DISK}3"
+    if [[ "$DISK" == *"nvme"* ]] || [[ "$DISK" == *"mmcblk"* ]]; then
+      EFI_PART="${DISK}p1"
+      SWAP_PART="${DISK}p2"
+      ROOT_PART="${DISK}p3"
+    else
+      EFI_PART="${DISK}1"
+      SWAP_PART="${DISK}2"
+      ROOT_PART="${DISK}3"
+    fi
   else
     # Create root partition (rest of disk)
     parted -s "$DISK" mkpart primary ext4 513MiB 100%
 
     # Set partition variables
-    EFI_PART="${DISK}1"
-    ROOT_PART="${DISK}2"
-  fi
-
-  # Handle nvme naming
-  if [[ "$DISK" == *"nvme"* ]]; then
-    EFI_PART="${DISK}p1"
-    if [ "$SWAP_TYPE" = "partition" ]; then
-      SWAP_PART="${DISK}p2"
-      ROOT_PART="${DISK}p3"
-    else
+    if [[ "$DISK" == *"nvme"* ]] || [[ "$DISK" == *"mmcblk"* ]]; then
+      EFI_PART="${DISK}p1"
       ROOT_PART="${DISK}p2"
+    else
+      EFI_PART="${DISK}1"
+      ROOT_PART="${DISK}2"
     fi
   fi
 
@@ -257,24 +346,23 @@ auto_partition_bios() {
     parted -s "$DISK" set 2 boot on
 
     # Set partition variables
-    SWAP_PART="${DISK}1"
-    ROOT_PART="${DISK}2"
+    if [[ "$DISK" == *"nvme"* ]] || [[ "$DISK" == *"mmcblk"* ]]; then
+      SWAP_PART="${DISK}p1"
+      ROOT_PART="${DISK}p2"
+    else
+      SWAP_PART="${DISK}1"
+      ROOT_PART="${DISK}2"
+    fi
   else
     # Create root partition (whole disk)
     parted -s "$DISK" mkpart primary ext4 1MiB 100%
     parted -s "$DISK" set 1 boot on
 
     # Set partition variables
-    ROOT_PART="${DISK}1"
-  fi
-
-  # Handle nvme naming
-  if [[ "$DISK" == *"nvme"* ]]; then
-    if [ "$SWAP_TYPE" = "partition" ]; then
-      SWAP_PART="${DISK}p1"
-      ROOT_PART="${DISK}p2"
-    else
+    if [[ "$DISK" == *"nvme"* ]] || [[ "$DISK" == *"mmcblk"* ]]; then
       ROOT_PART="${DISK}p1"
+    else
+      ROOT_PART="${DISK}1"
     fi
   fi
 
@@ -327,6 +415,43 @@ manual_partition() {
   export SWAP_PART
 }
 
+format_additional_disks() {
+  if [ ${#ADDITIONAL_DISKS[@]} -eq 0 ]; then
+    return 0
+  fi
+
+  print_info "Formatting additional disks..."
+
+  for i in "${!ADDITIONAL_DISKS[@]}"; do
+    local disk="${ADDITIONAL_DISKS[$i]}"
+
+    print_info "Formatting $disk..."
+
+    # Wipe disk
+    wipefs -af "$disk"
+
+    # Create single partition
+    parted -s "$disk" mklabel gpt
+    parted -s "$disk" mkpart primary ext4 1MiB 100%
+
+    # Determine partition name
+    local part
+    if [[ "$disk" == *"nvme"* ]] || [[ "$disk" == *"mmcblk"* ]]; then
+      part="${disk}p1"
+    else
+      part="${disk}1"
+    fi
+
+    # Format with ext4 (safe default for additional disks)
+    mkfs.ext4 -F "$part"
+
+    # Store partition name
+    ADDITIONAL_DISKS[$i]="$part"
+
+    print_success "Formatted: $part"
+  done
+}
+
 format_partitions() {
   print_info "Formatting partitions..."
 
@@ -360,6 +485,9 @@ format_partitions() {
     mkswap "$SWAP_PART"
   fi
 
+  # Format additional disks
+  format_additional_disks
+
   print_success "Partitions formatted"
 }
 
@@ -380,23 +508,18 @@ mount_partitions() {
     swapon "$SWAP_PART"
   fi
 
-  print_success "Partitions mounted"
-}
+  # Mount additional disks
+  for i in "${!ADDITIONAL_DISKS[@]}"; do
+    local part="${ADDITIONAL_DISKS[$i]}"
+    local mount_point="${ADDITIONAL_MOUNT_POINTS[$i]}"
 
-setup_zram() {
-  print_info "Setting up zram swap..."
+    print_info "Mounting $part at $mount_point..."
+    mkdir -p "/mnt$mount_point"
+    mount "$part" "/mnt$mount_point"
+    print_success "Mounted: $mount_point"
+  done
 
-  # Install zram-generator
-  arch-chroot /mnt pacman -S --noconfirm --needed zram-generator
-
-  # Configure zram
-  cat >/mnt/etc/systemd/zram-generator.conf <<EOF
-[zram0]
-zram-size = ram / 2
-compression-algorithm = zstd
-EOF
-
-  print_success "zram configured"
+  print_success "All partitions mounted"
 }
 
 display_summary() {
@@ -404,7 +527,7 @@ display_summary() {
   echo -e "${BLUE}═══════════════════════════════════════${NC}"
   echo -e "${BLUE}    Disk Configuration Summary${NC}"
   echo -e "${BLUE}═══════════════════════════════════════${NC}"
-  echo -e "Disk:         ${GREEN}$DISK${NC}"
+  echo -e "Main Disk:    ${GREEN}$DISK${NC}"
   echo -e "Mode:         ${GREEN}$PARTITION_MODE${NC}"
   if [ "$BOOT_MODE" = "UEFI" ]; then
     echo -e "EFI:          ${GREEN}$EFI_PART${NC}"
@@ -419,6 +542,15 @@ display_summary() {
   else
     echo -e "Swap:         ${YELLOW}None${NC}"
   fi
+
+  if [ ${#ADDITIONAL_DISKS[@]} -gt 0 ]; then
+    echo ""
+    echo -e "${BLUE}Additional Disks:${NC}"
+    for i in "${!ADDITIONAL_DISKS[@]}"; do
+      echo -e "  ${GREEN}${ADDITIONAL_DISKS[$i]}${NC} → ${ADDITIONAL_MOUNT_POINTS[$i]}"
+    done
+  fi
+
   echo -e "${BLUE}═══════════════════════════════════════${NC}"
   echo ""
 }
@@ -437,8 +569,11 @@ main() {
     return 1
   fi
 
-  # Select disk
+  # Select main disk
   select_disk
+
+  # Select additional disks
+  select_additional_disks
 
   # Select partitioning mode
   select_partitioning_mode
@@ -452,7 +587,7 @@ main() {
   # Display summary and confirm
   display_summary
 
-  print_warning "This will DESTROY all data on $DISK"
+  print_warning "This will DESTROY all data on selected disks"
   read -p "Proceed with disk setup? (y/N): " -n 1 -r
   echo
 
@@ -477,12 +612,6 @@ main() {
 
   # Mount partitions
   mount_partitions
-
-  # Setup zram if selected
-  if [ "$SWAP_TYPE" = "zram" ]; then
-    # Note: zram setup happens in finalize module after base install
-    :
-  fi
 
   print_success "Disk setup complete!"
 

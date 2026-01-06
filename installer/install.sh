@@ -116,7 +116,7 @@ check_prerequisites() {
   # Check if all modules exist
   local required_modules=(
     "00-checks.sh"
-    "10-disk.sh"
+    "10-disks.sh"
     "20-base.sh"
     "30-kernel.sh"
     "40-bootloader.sh"
