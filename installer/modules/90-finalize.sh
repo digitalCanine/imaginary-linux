@@ -218,9 +218,9 @@ configure_firewall() {
     arch-chroot /mnt pacman -S --noconfirm ufw
 
     # Enable and configure UFW
-    arch-chroot /mnt ufw default deny incoming
-    arch-chroot /mnt ufw default allow outgoing
-    arch-chroot /mnt ufw enable
+    arch-chroot /mnt ufw --force default deny incoming
+    arch-chroot /mnt ufw --force default allow outgoing
+    arch-chroot /mnt ufw --force enable
     arch-chroot /mnt systemctl enable ufw.service
 
     print_success "Firewall enabled and configured"
@@ -229,25 +229,188 @@ configure_firewall() {
   fi
 }
 
-enable_apparmor() {
-  # Check if AppArmor is available in kernel
-  if arch-chroot /mnt grep -q apparmor /proc/cmdline 2>/dev/null || [ -d /mnt/sys/kernel/security/apparmor ]; then
+harden_system() {
+  echo ""
+  echo -e "${BLUE}╔═══════════════════════════════════════════╗${NC}"
+  echo -e "${BLUE}║       System Security Hardening          ║${NC}"
+  echo -e "${BLUE}╚═══════════════════════════════════════════╝${NC}"
+  echo ""
+
+  print_info "Optional security hardening measures"
+  echo "This will apply various security improvements to your system."
+  echo ""
+
+  read -p "Apply security hardening? (Y/n): " -n 1 -r
+  echo
+
+  if [[ $REPLY =~ ^[Nn]$ ]]; then
+    print_info "Skipping system hardening"
+
+    # Still ask about AppArmor separately
     echo ""
-    read -p "Enable AppArmor (security framework)? (Y/n): " -n 1 -r
-    echo
+    if arch-chroot /mnt pacman -Q linux-hardened &>/dev/null || grep -q "apparmor" /proc/cmdline 2>/dev/null; then
+      read -p "Enable AppArmor (security framework)? (Y/n): " -n 1 -r
+      echo
 
-    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-      print_info "Installing AppArmor..."
-
-      arch-chroot /mnt pacman -S --noconfirm apparmor
-      arch-chroot /mnt systemctl enable apparmor.service
-
-      print_success "AppArmor enabled"
-      print_info "Note: Requires kernel parameter: apparmor=1 security=apparmor"
-    else
-      print_info "AppArmor not enabled"
+      if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+        print_info "Installing AppArmor..."
+        arch-chroot /mnt pacman -S --noconfirm apparmor
+        arch-chroot /mnt systemctl enable apparmor.service
+        print_success "AppArmor enabled"
+        print_info "Note: Requires kernel parameter: apparmor=1 security=apparmor"
+      fi
     fi
+
+    return 0
   fi
+
+  print_info "Applying system hardening..."
+
+  # 1. Restrict access to kernel logs
+  print_info "Restricting kernel log access..."
+  echo "kernel.dmesg_restrict = 1" >>/mnt/etc/sysctl.d/51-dmesg-restrict.conf
+
+  # 2. Restrict access to kernel pointers
+  echo "kernel.kptr_restrict = 2" >>/mnt/etc/sysctl.d/51-kptr-restrict.conf
+
+  # 3. Disable kernel module loading after boot
+  read -p "Disable kernel module loading after boot? (recommended for servers) (y/N): " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    echo "kernel.modules_disabled = 1" >>/mnt/etc/sysctl.d/51-modules-disabled.conf
+    print_success "Kernel module loading will be disabled after boot"
+  fi
+
+  # 4. Enable ASLR
+  print_info "Enabling full ASLR..."
+  echo "kernel.randomize_va_space = 2" >>/mnt/etc/sysctl.d/51-aslr.conf
+
+  # 5. Restrict ptrace
+  print_info "Restricting ptrace..."
+  echo "kernel.yama.ptrace_scope = 2" >>/mnt/etc/sysctl.d/51-ptrace.conf
+
+  # 6. Disable core dumps
+  read -p "Disable core dumps? (recommended for security) (Y/n): " -n 1 -r
+  echo
+  if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+    echo "kernel.core_pattern = |/bin/false" >>/mnt/etc/sysctl.d/51-coredump.conf
+    echo "* hard core 0" >>/mnt/etc/security/limits.conf
+    print_success "Core dumps disabled"
+  fi
+
+  # 7. Restrict su access to wheel group
+  print_info "Restricting su to wheel group..."
+  echo "auth required pam_wheel.so use_uid" >>/mnt/etc/pam.d/su
+
+  # 8. Set secure umask
+  print_info "Setting secure umask..."
+  sed -i 's/umask 022/umask 077/' /mnt/etc/profile 2>/dev/null || echo "umask 077" >>/mnt/etc/profile
+
+  # 9. Disable unused filesystems
+  print_info "Disabling unused filesystems..."
+  cat >>/mnt/etc/modprobe.d/blacklist-filesystems.conf <<'EOF'
+# Disable uncommon filesystems
+install cramfs /bin/false
+install freevxfs /bin/false
+install jffs2 /bin/false
+install hfs /bin/false
+install hfsplus /bin/false
+install udf /bin/false
+EOF
+
+  # 10. Harden SSH if installed
+  if arch-chroot /mnt pacman -Q openssh &>/dev/null; then
+    print_info "Hardening SSH configuration..."
+
+    # Backup original
+    cp /mnt/etc/ssh/sshd_config /mnt/etc/ssh/sshd_config.backup
+
+    # Apply hardening
+    cat >>/mnt/etc/ssh/sshd_config.d/hardening.conf <<'EOF'
+# Security hardening
+PermitRootLogin no
+PasswordAuthentication yes
+PubkeyAuthentication yes
+ChallengeResponseAuthentication no
+UsePAM yes
+X11Forwarding no
+PrintMotd no
+MaxAuthTries 3
+MaxSessions 2
+ClientAliveInterval 300
+ClientAliveCountMax 2
+Protocol 2
+EOF
+    print_success "SSH hardened"
+  fi
+
+  # 11. Systemd hardening
+  print_info "Applying systemd security settings..."
+
+  # Restrict coredumps in systemd
+  mkdir -p /mnt/etc/systemd/coredump.conf.d
+  cat >/mnt/etc/systemd/coredump.conf.d/disable.conf <<'EOF'
+[Coredump]
+Storage=none
+ProcessSizeMax=0
+EOF
+
+  # Harden systemd-resolved if used
+  mkdir -p /mnt/etc/systemd/resolved.conf.d
+  cat >/mnt/etc/systemd/resolved.conf.d/hardening.conf <<'EOF'
+[Resolve]
+DNSSEC=yes
+DNSOverTLS=opportunistic
+EOF
+
+  # 12. Set secure file permissions
+  print_info "Setting secure file permissions..."
+
+  # Protect sensitive files
+  arch-chroot /mnt chmod 700 /root
+  arch-chroot /mnt chmod 700 /home/*/.ssh 2>/dev/null || true
+  arch-chroot /mnt chmod 600 /etc/ssh/*_key 2>/dev/null || true
+
+  # 13. Enable automatic security updates (optional)
+  read -p "Enable automatic security updates? (y/N): " -n 1 -r
+  echo
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    # Install and enable systemd timer for updates
+    cat >/mnt/etc/systemd/system/update-system.service <<'EOF'
+[Unit]
+Description=Update system packages
+After=network-online.target
+
+[Service]
+Type=oneshot
+ExecStart=/usr/bin/pacman -Syu --noconfirm
+EOF
+
+    cat >/mnt/etc/systemd/system/update-system.timer <<'EOF'
+[Unit]
+Description=Daily system update
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target
+EOF
+
+    arch-chroot /mnt systemctl enable update-system.timer
+    print_success "Automatic updates enabled (daily)"
+  fi
+
+  print_success "System hardening complete!"
+
+  echo ""
+  print_warning "Important Notes:"
+  echo "  - Core dumps are disabled for security"
+  echo "  - SSH root login is disabled (use sudo)"
+  echo "  - Default umask is now 077 (more restrictive)"
+  echo "  - Review /etc/sysctl.d/ for kernel parameters"
+  echo ""
 }
 
 enable_systemd_services() {
@@ -434,7 +597,7 @@ main() {
   configure_pacman
   install_aur_helper
   configure_firewall
-  enable_apparmor
+  harden_system
   enable_systemd_services
   create_swap_file
   setup_fastfetch
