@@ -53,7 +53,6 @@ Imaginary Linux is a security-focused, user-friendly Arch-based distribution des
 - **Automated CLI installer** - No manual partitioning or configuration needed
 - **Multiple desktop environments** - GNOME, KDE, XFCE, Cinnamon, BSPWM, i3, Hyprland
 - **Custom BSPWM rice** - Pre-configured beautiful setup for BSPWM users
-- **Flexible partitioning** - Preserve existing home partition, encryption support (LUKS)
 - **Dual boot aware** - Detects other operating systems
 
 ### Security
@@ -213,6 +212,8 @@ Optional security hardening includes:
 - [] Imaginary Angel 2.0.0
 - [] Better hardening
 - [] More angelic theming
+- [] Allow to keep old partitions
+- [] LUKS encryption during the installer
 
 ### Version history
 
