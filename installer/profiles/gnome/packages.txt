@@ -1,0 +1,34 @@
+# GNOME Desktop Environment
+# Full-featured desktop with modern interface
+
+# Core GNOME
+gnome
+gdm
+
+# Extra GNOME applications and utilities
+gnome-tweaks
+gnome-shell-extensions
+dconf-editor
+
+# File manager extensions
+nautilus
+file-roller
+sushi
+
+# System utilities
+gnome-disk-utility
+gnome-system-monitor
+
+# Network
+networkmanager
+network-manager-applet
+
+# Multimedia
+eog
+totem
+gnome-music
+
+# Archive support
+p7zip
+unzip
+unrar

@@ -1,0 +1,72 @@
+# BSPWM Window Manager
+# Binary space partitioning window manager
+
+# Core BSPWM
+bspwm
+sxhkd
+
+# Display manager
+ly
+
+# Terminal
+kitty
+
+# Panel/bar
+polybar
+
+# Compositor
+picom
+
+# Application launcher
+rofi
+
+# Notifications
+dunst
+
+# Wallpaper
+nitrogen
+feh
+
+# System utilities
+xorg-xsetroot
+xorg-xprop
+xorg-xwininfo
+
+# File manager
+thunar
+gvfs
+tumbler
+
+# Audio
+pavucontrol
+pulseaudio
+pulsemixer
+
+# Network
+networkmanager
+nm-applet
+
+# Utilities
+scrot
+maim
+xclip
+xdotool
+xdo
+
+# Screen locker
+betterlockscreen
+
+# Archive support
+p7zip
+unzip
+unrar
+
+# Fonts
+ttf-dejavu
+ttf-liberation
+noto-fonts
+ttf-font-awesome
+
+# AUR packages (optional, requires AUR helper)
+AUR:betterlockscreen
+AUR:picom-git

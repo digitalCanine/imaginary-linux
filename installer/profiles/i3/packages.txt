@@ -1,0 +1,51 @@
+# i3 Window Manager
+# Tiling window manager for power users
+
+# Core i3
+i3-wm
+i3status
+i3lock
+dmenu
+
+# Display manager
+ly
+
+# Terminal
+kitty
+
+# System utilities
+picom
+nitrogen
+dunst
+xss-lock
+nm-applet
+
+# Application launcher
+rofi
+
+# File manager
+thunar
+gvfs
+
+# Audio
+pavucontrol
+pulseaudio
+
+# Network
+networkmanager
+
+# Utilities
+scrot
+feh
+xclip
+xdotool
+
+# Archive support
+p7zip
+unzip
+unrar
+
+# Fonts
+ttf-dejavu
+ttf-liberation
+noto-fonts

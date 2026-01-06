@@ -1,0 +1,53 @@
+# Hyprland Wayland Compositor
+# Modern tiling Wayland compositor
+
+# Core Hyprland
+hyprland
+xdg-desktop-portal-hyprland
+
+# Display manager
+ly
+
+# Terminal
+kitty
+
+# Wayland utilities
+waybar
+wofi
+dunst
+grim
+slurp
+wl-clipboard
+swaylock
+swayidle
+
+# File manager
+thunar
+gvfs
+
+# Audio
+pavucontrol
+pipewire
+pipewire-pulse
+wireplumber
+
+# Network
+networkmanager
+
+# Background
+swaybg
+
+# Utilities
+polkit-gnome
+qt5-wayland
+qt6-wayland
+
+# Archive support
+p7zip
+unzip
+unrar
+
+# Fonts
+ttf-dejavu
+ttf-liberation
+noto-fonts

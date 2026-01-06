@@ -1,0 +1,34 @@
+# KDE Plasma Desktop Environment
+# Feature-rich and customizable desktop
+
+# Core KDE Plasma
+plasma-meta
+sddm
+sddm-kcm
+
+# KDE Applications
+kate
+konsole
+dolphin
+ark
+spectacle
+gwenview
+okular
+
+# System utilities
+partitionmanager
+kcalc
+kwalletmanager
+
+# Network
+networkmanager
+plasma-nm
+
+# Multimedia
+elisa
+kwave
+
+# Archive support
+p7zip
+unzip
+unrar

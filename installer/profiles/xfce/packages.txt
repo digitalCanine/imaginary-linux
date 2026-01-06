@@ -1,0 +1,36 @@
+# XFCE Desktop Environment
+# Lightweight and classic desktop experience
+
+# Core XFCE
+xfce4
+xfce4-goodies
+lightdm
+lightdm-gtk-greeter
+lightdm-gtk-greeter-settings
+
+# File manager
+thunar
+thunar-archive-plugin
+thunar-volman
+gvfs
+tumbler
+
+# Terminal
+xfce4-terminal
+
+# System utilities
+xfce4-taskmanager
+
+# Network
+networkmanager
+network-manager-applet
+
+# Multimedia
+ristretto
+parole
+
+# Archive support
+xarchiver
+p7zip
+unzip
+unrar

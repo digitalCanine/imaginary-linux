@@ -1,0 +1,34 @@
+# Cinnamon Desktop Environment
+# Traditional desktop layout with modern features
+
+# Core Cinnamon
+cinnamon
+lightdm
+lightdm-gtk-greeter
+lightdm-gtk-greeter-settings
+
+# Cinnamon tools
+nemo
+nemo-fileroller
+gnome-terminal
+cinnamon-control-center
+
+# System utilities
+gnome-system-monitor
+gnome-calculator
+gnome-screenshot
+
+# Network
+networkmanager
+network-manager-applet
+
+# Multimedia
+xviewer
+xreader
+xplayer
+
+# Archive support
+file-roller
+p7zip
+unzip
+unrar
