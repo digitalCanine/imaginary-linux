@@ -117,6 +117,11 @@ detect_boot_partition() {
 install_systemd_boot() {
   print_info "Installing systemd-boot..."
 
+  # Clean up any existing bootloader installations first
+  print_info "Cleaning up old bootloader files..."
+  rm -rf /mnt"$BOOT_MOUNT"/EFI/GRUB 2>/dev/null || true
+  rm -rf /mnt/boot/grub 2>/dev/null || true
+
   # Install systemd-boot to EFI partition
   arch-chroot /mnt bootctl --esp-path="$BOOT_MOUNT" install
 
@@ -142,7 +147,7 @@ EOF
   # Create boot entry
   print_info "Creating boot entry..."
 
-  # Detect kernel
+  # Detect kernel - check what's actually installed
   if ls /mnt/boot/vmlinuz-linux-hardened &>/dev/null; then
     KERNEL_NAME="linux-hardened"
     KERNEL_PATH="/vmlinuz-linux-hardened"
@@ -163,19 +168,49 @@ EOF
 
   print_info "Detected kernel: $KERNEL_NAME"
 
-  # Create entry file
+  # Verify kernel and initramfs exist
+  if [ ! -f /mnt/boot/vmlinuz-$KERNEL_NAME ]; then
+    print_error "Kernel not found: /boot/vmlinuz-$KERNEL_NAME"
+    return 1
+  fi
+
+  if [ ! -f /mnt/boot/initramfs-$KERNEL_NAME.img ]; then
+    print_error "Initramfs not found: /boot/initramfs-$KERNEL_NAME.img"
+    print_info "Generating initramfs..."
+    arch-chroot /mnt mkinitcpio -p $KERNEL_NAME
+  fi
+
+  # Get root filesystem type
+  ROOT_FSTYPE=$(findmnt -n -o FSTYPE /mnt)
+  print_info "Root filesystem: $ROOT_FSTYPE"
+
+  # Remove any old auto-generated entries
+  rm -f /mnt"$BOOT_MOUNT"/loader/entries/*-$KERNEL_NAME*.conf 2>/dev/null || true
+
+  # Create clean entry file
   cat >/mnt"$BOOT_MOUNT"/loader/entries/imaginary.conf <<EOF
 title   Imaginary Linux
 linux   $KERNEL_PATH
 initrd  $INITRAMFS_PATH
-options root=PARTUUID=$ROOT_PARTUUID rw quiet loglevel=3
+options root=PARTUUID=$ROOT_PARTUUID rootfstype=$ROOT_FSTYPE rw
 EOF
 
   print_success "Boot entry created: imaginary.conf"
 
-  # Show the entry
+  # Show the entry for verification
   print_info "Boot entry content:"
   cat /mnt"$BOOT_MOUNT"/loader/entries/imaginary.conf
+
+  # Verify the PARTUUID actually exists
+  print_info "Verifying PARTUUID..."
+  if blkid | grep -q "$ROOT_PARTUUID"; then
+    print_success "PARTUUID verified: $ROOT_PARTUUID"
+  else
+    print_error "PARTUUID not found in system!"
+    print_info "Available PARTUUIDs:"
+    blkid | grep PARTUUID
+    return 1
+  fi
 
   return 0
 }
