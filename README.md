@@ -49,6 +49,7 @@ Imaginary Linux is a security-focused, user-friendly Arch-based distribution des
 ## ✨ Features
 
 ### Installation
+
 - **Automated CLI installer** - No manual partitioning or configuration needed
 - **Multiple desktop environments** - GNOME, KDE, XFCE, Cinnamon, BSPWM, i3, Hyprland
 - **Custom BSPWM rice** - Pre-configured beautiful setup for BSPWM users
@@ -56,6 +57,7 @@ Imaginary Linux is a security-focused, user-friendly Arch-based distribution des
 - **Dual boot aware** - Detects other operating systems
 
 ### Security
+
 - **Hardened kernel options** - Security-focused kernel parameters
 - **AppArmor support** - Mandatory Access Control framework
 - **UFW firewall** - Enabled and configured by default
@@ -75,6 +77,7 @@ Imaginary Linux is a security-focused, user-friendly Arch-based distribution des
 | **Hyprland** | WM | Modern Wayland compositor |
 
 ### Package Management
+
 - **pacman** - Fast, efficient package manager
 - **AUR support** - Choose between paru or yay
 - **Minimal base** - Install only what you need
@@ -92,19 +95,25 @@ Download the latest release from [GitHub Releases](https://github.com/youruserna
 
 1. **Boot from any Arch Linux ISO**
 2. **Connect to the internet:**
+
    ```bash
    systemctl start NetworkManager
    nmtui
    ```
+
 3. **Clone the repository:**
+
    ```bash
-   git clone https://github.com/yourusername/imaginary-linux.git
+   git clone https://github.com/digitalcanine/imaginary-linux.git
    cd imaginary-linux
    ```
+
 4. **Run the installer:**
+
    ```bash
    sudo ./installer/install.sh
    ```
+
 5. **Follow the prompts** - The installer will guide you through the process
 
 See [INSTALL.md](INSTALL.md) for detailed installation instructions.
@@ -114,6 +123,7 @@ See [INSTALL.md](INSTALL.md) for detailed installation instructions.
 ## 📦 What's Included
 
 ### Base System
+
 - Linux kernel (choice of standard, LTS, zen, or hardened)
 - Base-devel tools
 - NetworkManager
@@ -123,12 +133,14 @@ See [INSTALL.md](INSTALL.md) for detailed installation instructions.
 ### Desktop Profiles
 
 **Minimal Installation:**
+
 - Desktop environment/window manager
 - Terminal emulator (kitty)
 - Web browser (Firefox)
 - Essential utilities
 
 **Full Installation:**
+
 - Everything in Minimal
 - File manager
 - Archive tools
@@ -136,7 +148,9 @@ See [INSTALL.md](INSTALL.md) for detailed installation instructions.
 - Multimedia support
 
 ### Optional Packages
+
 Choose from curated categories:
+
 - Web browsers (Firefox, Chromium, Brave, LibreWolf)
 - Editors (Neovim, VS Code, VSCodium)
 - Communication (Discord, Telegram, Signal)
@@ -168,6 +182,7 @@ The rice repository: [bspwm-rice](https://github.com/schizopup/bspwm-rice)
 ### System Hardening
 
 Optional security hardening includes:
+
 - Kernel parameter hardening (dmesg_restrict, kptr_restrict, ASLR)
 - Restricted ptrace access
 - Core dump disabling
@@ -184,7 +199,6 @@ Optional security hardening includes:
 
 ### Partition Schemes
 
-- Preserve existing /home partition
 - Btrfs with snapshots
 - Swap (file, partition, or zram)
 
@@ -202,6 +216,7 @@ Optional security hardening includes:
 ## 🔄 Version History
 
 ### Version 1.0 (Shamshel) - Current
+
 - Initial public release
 - Automated installer
 - 7 desktop environment options
@@ -210,6 +225,7 @@ Optional security hardening includes:
 - UEFI and BIOS support
 
 Future versions will follow Evangelion angel naming:
+
 - **1.x (Shamshel)** - Current stable series
 - **2.x (Ramiel)** - Future major release
 - And so on...
@@ -219,13 +235,12 @@ Future versions will follow Evangelion angel naming:
 ## 🤝 Contributing
 
 Contributions are welcome! Whether it's:
+
 - Bug reports
 - Feature requests
 - Code improvements
 - Documentation
 - New desktop environment profiles
-
-Please see [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
 
 ---
 
@@ -249,8 +264,8 @@ The Linux kernel and included packages retain their original licenses.
 
 ## 📞 Support
 
-- **Issues:** [GitHub Issues](https://github.com/yourusername/imaginary-linux/issues)
-- **Discussions:** [GitHub Discussions](https://github.com/yourusername/imaginary-linux/discussions)
+- **Issues:** [GitHub Issues](https://github.com/digitalcanine/imaginary-linux/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/digitalcanine/imaginary-linux/discussions)
 
 ---
 
