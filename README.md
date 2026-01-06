@@ -217,7 +217,7 @@ Optional security hardening includes:
 ### Version history
 
 - 0.5.6 (Sachiel) - First prototype of the OS
-- **1.1.6 (Shamshel)** - Current stable series
+- **1.1.X (Shamshel)** - Current stable series
 - 2.X.X (Ramiel) - Future major release
 
 ---
