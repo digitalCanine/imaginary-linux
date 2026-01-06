@@ -10,15 +10,15 @@ BLUE='\033[0;34m'
 NC='\033[0m'
 
 print_info() {
-  echo -e "${BLUE}[INFO]${NC} $1"
+    echo -e "${BLUE}[INFO]${NC} $1"
 }
 
 print_success() {
-  echo -e "${GREEN}[✓]${NC} $1"
+    echo -e "${GREEN}[✓]${NC} $1"
 }
 
 print_error() {
-  echo -e "${RED}[✗]${NC} $1"
+    echo -e "${RED}[✗]${NC} $1"
 }
 
 # Package categories
@@ -90,410 +90,442 @@ UTILITIES["fastfetch"]="fastfetch - Fast system info"
 UTILITIES["tmux"]="tmux - Terminal multiplexer"
 
 select_from_category() {
-  local category_name=$1
-  shift
-  local -a pkg_list=("$@")
-  local selected_packages=()
-
-  echo ""
-  echo -e "${BLUE}═══ $category_name ═══${NC}"
-  echo ""
-
-  # Check if category has items
-  if [ ${#pkg_list[@]} -eq 0 ]; then
-    print_warning "No packages in this category"
-    return 0
-  fi
-
-  local index=1
-  local i=0
-  local -a pkg_names=()
-
-  # Iterate through pairs of (name, description)
-  while [ $i -lt ${#pkg_list[@]} ]; do
-    local pkg_name="${pkg_list[$i]}"
-    local pkg_desc="${pkg_list[$((i + 1))]}"
-
-    printf "  %d) %s\n" "$index" "$pkg_name"
-    printf "     %s\n" "$pkg_desc"
+    local category_name=$1
+    local array_name=$2
+    local -n category=$array_name
+    
     echo ""
-
-    pkg_names+=("$pkg_name")
-    ((index++))
-    ((i += 2))
-  done
-
-  echo "  0) Skip this category"
-  echo "  a) Install all from this category"
-  echo ""
-
-  read -p "Select packages (space-separated numbers, 'a' for all, or '0' to skip): " selection
-
-  # Handle empty input
-  if [ -z "$selection" ] || [ "$selection" = "0" ]; then
-    return 0
-  fi
-
-  if [ "$selection" = "a" ] || [ "$selection" = "A" ]; then
-    selected_packages=("${pkg_names[@]}")
-  else
-    for num in $selection; do
-      if [[ "$num" =~ ^[0-9]+$ ]] && [ "$num" -gt 0 ] && [ "$num" -le "${#pkg_names[@]}" ]; then
-        selected_packages+=("${pkg_names[$((num - 1))]}")
-      fi
+    echo -e "${BLUE}═══ $category_name ═══${NC}"
+    echo ""
+    
+    # Check if category has items
+    if [ ${#category[@]} -eq 0 ]; then
+        print_warning "No packages in this category"
+        return 0
+    fi
+    
+    local index=1
+    local -a pkg_names=()
+    local -a pkg_descs=()
+    
+    # Build arrays of package names and descriptions
+    for pkg in "${!category[@]}"; do
+        pkg_names+=("$pkg")
+        pkg_descs+=("${category[$pkg]}")
     done
-  fi
-
-  if [ ${#selected_packages[@]} -gt 0 ]; then
-    echo "${selected_packages[@]}"
-  fi
+    
+    # Display packages
+    for i in "${!pkg_names[@]}"; do
+        local num=$((i + 1))
+        printf "  %d) %s\n" "$num" "${pkg_names[$i]}"
+        printf "     %s\n" "${pkg_descs[$i]}"
+        echo ""
+    done
+    
+    echo "  0) Skip this category"
+    echo "  a) Install all from this category"
+    echo ""
+    
+    read -p "Select packages (space-separated numbers, 'a' for all, or '0' to skip): " selection
+    
+    # Handle empty input or skip
+    if [ -z "$selection" ] || [ "$selection" = "0" ]; then
+        return 0
+    fi
+    
+    # Handle 'install all'
+    if [ "$selection" = "a" ] || [ "$selection" = "A" ]; then
+        printf "%s\n" "${pkg_names[@]}"
+        return 0
+    fi
+    
+    # Handle individual selections
+    for num in $selection; do
+        if [[ "$num" =~ ^[0-9]+$ ]] && [ "$num" -gt 0 ] && [ "$num" -le "${#pkg_names[@]}" ]; then
+            echo "${pkg_names[$((num-1))]}"
+        fi
+    done
 }
 
-# Helper function to convert associative array to flat list
-array_to_list() {
-  local -n arr=$1
-  local result=()
-
-  for key in "${!arr[@]}"; do
-    result+=("$key" "${arr[$key]}")
-  done
-
-  echo "${result[@]}"
-}
+# Remove the array_to_list function as it's no longer needed
 
 install_packages() {
-  local packages=("$@")
-
-  if [ ${#packages[@]} -eq 0 ]; then
-    print_info "No packages selected"
-    return 0
-  fi
-
-  print_info "Installing selected packages..."
-
-  # Separate AUR and official repo packages
-  local repo_packages=()
-  local aur_packages=()
-
-  for pkg in "${packages[@]}"; do
-    case "$pkg" in
-    *-bin | brave-bin | librewolf-bin | vscodium-bin | obsidian | notion-app)
-      aur_packages+=("$pkg")
-      ;;
-    code)
-      aur_packages+=("visual-studio-code-bin")
-      ;;
-    *)
-      repo_packages+=("$pkg")
-      ;;
-    esac
-  done
-
-  # Install official repo packages
-  if [ ${#repo_packages[@]} -gt 0 ]; then
-    print_info "Installing from official repositories..."
-    arch-chroot /mnt pacman -S --noconfirm --needed "${repo_packages[@]}"
-
-    if [ $? -eq 0 ]; then
-      print_success "Official packages installed"
-    else
-      print_error "Some official packages failed to install"
+    local packages=("$@")
+    
+    if [ ${#packages[@]} -eq 0 ]; then
+        print_info "No packages selected"
+        return 0
     fi
-  fi
-
-  # Install AUR packages if AUR helper is available
-  if [ ${#aur_packages[@]} -gt 0 ]; then
-    if [ -n "$AUR_HELPER" ]; then
-      print_info "Installing from AUR..."
-      for aur_pkg in "${aur_packages[@]}"; do
-        arch-chroot /mnt sudo -u "$USERNAME" "$AUR_HELPER" -S --noconfirm --needed "$aur_pkg"
-      done
-      print_success "AUR packages installed"
-    else
-      print_error "AUR helper not available, skipping AUR packages:"
-      printf '%s\n' "${aur_packages[@]}"
+    
+    print_info "Installing selected packages..."
+    
+    # Separate AUR and official repo packages
+    local repo_packages=()
+    local aur_packages=()
+    
+    for pkg in "${packages[@]}"; do
+        case "$pkg" in
+            *-bin|brave-bin|librewolf-bin|vscodium-bin|obsidian|notion-app)
+                aur_packages+=("$pkg")
+                ;;
+            code)
+                aur_packages+=("visual-studio-code-bin")
+                ;;
+            *)
+                repo_packages+=("$pkg")
+                ;;
+        esac
+    done
+    
+    # Install official repo packages
+    if [ ${#repo_packages[@]} -gt 0 ]; then
+        print_info "Installing from official repositories..."
+        arch-chroot /mnt pacman -S --noconfirm --needed "${repo_packages[@]}"
+        
+        if [ $? -eq 0 ]; then
+            print_success "Official packages installed"
+        else
+            print_error "Some official packages failed to install"
+        fi
     fi
-  fi
+    
+    # Install AUR packages if AUR helper is available
+    if [ ${#aur_packages[@]} -gt 0 ]; then
+        if [ -n "$AUR_HELPER" ]; then
+            print_info "Installing from AUR..."
+            for aur_pkg in "${aur_packages[@]}"; do
+                arch-chroot /mnt sudo -u "$USERNAME" "$AUR_HELPER" -S --noconfirm --needed "$aur_pkg"
+            done
+            print_success "AUR packages installed"
+        else
+            print_error "AUR helper not available, skipping AUR packages:"
+            printf '%s\n' "${aur_packages[@]}"
+        fi
+    fi
 }
 
 select_installation_profile() {
-  echo ""
-  echo -e "${BLUE}╔═══════════════════════════════════════════╗${NC}"
-  echo -e "${BLUE}║    Additional Software Installation       ║${NC}"
-  echo -e "${BLUE}╚═══════════════════════════════════════════╝${NC}"
-  echo ""
-
-  echo "Choose installation profile:"
-  echo "1) Minimal - Only essential tools"
-  echo "2) Standard - Common applications"
-  echo "3) Full - Everything including gaming and development"
-  echo "4) Custom - Pick individual packages"
-  echo ""
-
-  read -p "Select profile [1-4]: " profile_choice
-
-  case $profile_choice in
-  1)
-    INSTALL_PROFILE="minimal"
-    ;;
-  2)
-    INSTALL_PROFILE="standard"
-    ;;
-  3)
-    INSTALL_PROFILE="full"
-    ;;
-  4)
-    INSTALL_PROFILE="custom"
-    ;;
-  *)
-    print_error "Invalid selection, using minimal"
-    INSTALL_PROFILE="minimal"
-    ;;
-  esac
-
-  export INSTALL_PROFILE
+    echo ""
+    echo -e "${BLUE}╔═══════════════════════════════════════════╗${NC}"
+    echo -e "${BLUE}║    Additional Software Installation       ║${NC}"
+    echo -e "${BLUE}╚═══════════════════════════════════════════╝${NC}"
+    echo ""
+    
+    echo "Choose installation profile:"
+    echo "1) Minimal - Only essential tools"
+    echo "2) Standard - Common applications"
+    echo "3) Full - Everything including gaming and development"
+    echo "4) Custom - Pick individual packages"
+    echo ""
+    
+    read -p "Select profile [1-4]: " profile_choice
+    
+    case $profile_choice in
+        1)
+            INSTALL_PROFILE="minimal"
+            ;;
+        2)
+            INSTALL_PROFILE="standard"
+            ;;
+        3)
+            INSTALL_PROFILE="full"
+            ;;
+        4)
+            INSTALL_PROFILE="custom"
+            ;;
+        *)
+            print_error "Invalid selection, using minimal"
+            INSTALL_PROFILE="minimal"
+            ;;
+    esac
+    
+    export INSTALL_PROFILE
 }
 
 install_minimal() {
-  print_info "Installing minimal package set..."
-
-  local packages=(
-    "firefox"
-    "git"
-    "htop"
-    "fastfetch"
-    "vim"
-  )
-
-  install_packages "${packages[@]}"
+    print_info "Installing minimal package set..."
+    
+    local packages=(
+        "firefox"
+        "git"
+        "htop"
+        "fastfetch"
+        "vim"
+    )
+    
+    install_packages "${packages[@]}"
 }
 
 install_standard() {
-  print_info "Installing standard package set..."
-
-  local packages=(
-    "firefox"
-    "thunderbird"
-    "libreoffice-fresh"
-    "vlc"
-    "gimp"
-    "git"
-    "github-cli"
-    "htop"
-    "fastfetch"
-    "neovim"
-    "discord"
-  )
-
-  install_packages "${packages[@]}"
+    print_info "Installing standard package set..."
+    
+    local packages=(
+        "firefox"
+        "thunderbird"
+        "libreoffice-fresh"
+        "vlc"
+        "gimp"
+        "git"
+        "github-cli"
+        "htop"
+        "fastfetch"
+        "neovim"
+        "discord"
+    )
+    
+    install_packages "${packages[@]}"
 }
 
 install_full() {
-  print_info "Installing full package set..."
-
-  local packages=(
-    "firefox"
-    "chromium"
-    "thunderbird"
-    "libreoffice-fresh"
-    "vlc"
-    "mpv"
-    "gimp"
-    "inkscape"
-    "git"
-    "github-cli"
-    "docker"
-    "base-devel"
-    "htop"
-    "btop"
-    "fastfetch"
-    "neovim"
-    "discord"
-    "telegram-desktop"
-    "steam"
-    "lutris"
-    "wine"
-    "gamemode"
-    "tmux"
-  )
-
-  install_packages "${packages[@]}"
-
-  # Enable docker if installed
-  if arch-chroot /mnt pacman -Q docker &>/dev/null; then
-    arch-chroot /mnt systemctl enable docker.service
-    arch-chroot /mnt usermod -aG docker "$USERNAME"
-    print_success "Docker enabled and user added to docker group"
-  fi
+    print_info "Installing full package set..."
+    
+    local packages=(
+        "firefox"
+        "chromium"
+        "thunderbird"
+        "libreoffice-fresh"
+        "vlc"
+        "mpv"
+        "gimp"
+        "inkscape"
+        "git"
+        "github-cli"
+        "docker"
+        "base-devel"
+        "htop"
+        "btop"
+        "fastfetch"
+        "neovim"
+        "discord"
+        "telegram-desktop"
+        "steam"
+        "lutris"
+        "wine"
+        "gamemode"
+        "tmux"
+    )
+    
+    install_packages "${packages[@]}"
+    
+    # Enable docker if installed
+    if arch-chroot /mnt pacman -Q docker &>/dev/null; then
+        arch-chroot /mnt systemctl enable docker.service
+        arch-chroot /mnt usermod -aG docker "$USERNAME"
+        print_success "Docker enabled and user added to docker group"
+    fi
 }
 
 install_custom() {
-  print_info "Custom package selection..."
-
-  # Debug: Check if arrays are populated
-  print_info "Checking package categories..."
-  echo "  Browsers: ${#BROWSERS[@]} items"
-  echo "  Terminals: ${#TERMINALS[@]} items"
-  echo "  Editors: ${#EDITORS[@]} items"
-  echo "  File Managers: ${#FILE_MANAGERS[@]} items"
-  echo "  Media Players: ${#MEDIA_PLAYERS[@]} items"
-  echo "  Graphics: ${#GRAPHICS[@]} items"
-  echo "  Communication: ${#COMMUNICATION[@]} items"
-  echo "  Development: ${#DEVELOPMENT[@]} items"
-  echo "  Productivity: ${#PRODUCTIVITY[@]} items"
-  echo "  Gaming: ${#GAMING[@]} items"
-  echo "  Utilities: ${#UTILITIES[@]} items"
-  echo ""
-
-  if [ ${#BROWSERS[@]} -eq 0 ]; then
-    print_error "Package arrays are empty! This is a bug."
-    return 1
-  fi
-
-  local all_packages=()
-
-  # Show instructions
-  echo ""
-  echo "For each category:"
-  echo "  - Enter numbers separated by spaces (e.g., '1 3 5')"
-  echo "  - Enter 'a' to install all from category"
-  echo "  - Enter '0' to skip category"
-  echo ""
-  read -p "Press Enter to continue..." dummy
-
-  # Browser selection
-  if [ ${#BROWSERS[@]} -gt 0 ]; then
-    local browser_pkgs=$(select_from_category "Web Browsers" $(array_to_list BROWSERS))
-    all_packages+=($browser_pkgs)
-  fi
-
-  # Terminal selection
-  if [ ${#TERMINALS[@]} -gt 0 ]; then
-    local terminal_pkgs=$(select_from_category "Terminal Emulators" $(array_to_list TERMINALS))
-    all_packages+=($terminal_pkgs)
-  fi
-
-  # Editor selection
-  if [ ${#EDITORS[@]} -gt 0 ]; then
-    local editor_pkgs=$(select_from_category "Text Editors" $(array_to_list EDITORS))
-    all_packages+=($editor_pkgs)
-  fi
-
-  # File manager selection
-  if [ ${#FILE_MANAGERS[@]} -gt 0 ]; then
-    local fm_pkgs=$(select_from_category "File Managers" $(array_to_list FILE_MANAGERS))
-    all_packages+=($fm_pkgs)
-  fi
-
-  # Media player selection
-  if [ ${#MEDIA_PLAYERS[@]} -gt 0 ]; then
-    local media_pkgs=$(select_from_category "Media Players" $(array_to_list MEDIA_PLAYERS))
-    all_packages+=($media_pkgs)
-  fi
-
-  # Graphics selection
-  if [ ${#GRAPHICS[@]} -gt 0 ]; then
-    local graphics_pkgs=$(select_from_category "Graphics Software" $(array_to_list GRAPHICS))
-    all_packages+=($graphics_pkgs)
-  fi
-
-  # Communication selection
-  if [ ${#COMMUNICATION[@]} -gt 0 ]; then
-    local comm_pkgs=$(select_from_category "Communication" $(array_to_list COMMUNICATION))
-    all_packages+=($comm_pkgs)
-  fi
-
-  # Development selection
-  if [ ${#DEVELOPMENT[@]} -gt 0 ]; then
-    local dev_pkgs=$(select_from_category "Development Tools" $(array_to_list DEVELOPMENT))
-    all_packages+=($dev_pkgs)
-  fi
-
-  # Productivity selection
-  if [ ${#PRODUCTIVITY[@]} -gt 0 ]; then
-    local prod_pkgs=$(select_from_category "Productivity" $(array_to_list PRODUCTIVITY))
-    all_packages+=($prod_pkgs)
-  fi
-
-  # Gaming selection
-  if [ ${#GAMING[@]} -gt 0 ]; then
-    local gaming_pkgs=$(select_from_category "Gaming" $(array_to_list GAMING))
-    all_packages+=($gaming_pkgs)
-  fi
-
-  # Utilities selection
-  if [ ${#UTILITIES[@]} -gt 0 ]; then
-    local util_pkgs=$(select_from_category "Utilities" $(array_to_list UTILITIES))
-    all_packages+=($util_pkgs)
-  fi
-
-  # Install all selected packages
-  if [ ${#all_packages[@]} -gt 0 ]; then
+    print_info "Custom package selection..."
+    
+    # Debug: Check if arrays are populated
+    print_info "Available package categories:"
+    echo "  • Browsers: ${#BROWSERS[@]} packages"
+    echo "  • Terminals: ${#TERMINALS[@]} packages"
+    echo "  • Editors: ${#EDITORS[@]} packages"
+    echo "  • File Managers: ${#FILE_MANAGERS[@]} packages"
+    echo "  • Media Players: ${#MEDIA_PLAYERS[@]} packages"
+    echo "  • Graphics: ${#GRAPHICS[@]} packages"
+    echo "  • Communication: ${#COMMUNICATION[@]} packages"
+    echo "  • Development: ${#DEVELOPMENT[@]} packages"
+    echo "  • Productivity: ${#PRODUCTIVITY[@]} packages"
+    echo "  • Gaming: ${#GAMING[@]} packages"
+    echo "  • Utilities: ${#UTILITIES[@]} packages"
     echo ""
-    print_info "Selected packages:"
-    printf '  - %s\n' "${all_packages[@]}"
-    echo ""
-    read -p "Proceed with installation? (Y/n): " -n 1 -r
+    
+    read -p "Do you want to manually select packages? (Y/n): " -n 1 -r
     echo
-
-    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-      install_packages "${all_packages[@]}"
-    else
-      print_info "Package installation cancelled"
+    
+    if [[ $REPLY =~ ^[Nn]$ ]]; then
+        print_info "Skipping custom package selection"
+        return 0
     fi
-  else
-    print_info "No packages selected"
-  fi
-}
+    
+    local all_packages=()
+    local tmp=()
+    
+    # Instructions
+    echo ""
+    echo "For each category:"
+    echo "  - Enter numbers separated by spaces (e.g., '1 3 5')"
+    echo "  - Enter 'a' to install all from category"
+    echo "  - Enter '0' or press Enter to skip category"
+    echo ""
+    read -p "Press Enter to continue..." dummy
+    
+    # Web Browsers
+    mapfile -t tmp < <(select_from_category "Web Browsers" BROWSERS)
+    all_packages+=("${tmp[@]}")
+    
+    # Terminals
+    mapfile -t tmp < <(select_from_category "Terminal Emulators" TERMINALS)
+    all_packages+=("${tmp[@]}")
+    
+    # Editors
+    mapfile -t tmp < <(select_from_category "Text Editors" EDITORS)
+    all_packages+=("${tmp[@]}")
+    
+    # File Managers
+    mapfile -t tmp < <(select_from_category "File Managers" FILE_MANAGERS)
+    all_packages+=("${tmp[@]}")
+    
+    # Media Players
+    mapfile -t tmp < <(select_from_category "Media Players" MEDIA_PLAYERS)
+    all_packages+=("${tmp[@]}")
+    
+    # Graphics
+    mapfile -t tmp < <(select_from_category "Graphics Software" GRAPHICS)
+    all_packages+=("${tmp[@]}")
+    
+    # Communication
+    mapfile -t tmp < <(select_from_category "Communication" COMMUNICATION)
+    all_packages+=("${tmp[@]}")
+    
+    # Development
+    mapfile -t tmp < <(select_from_category "Development Tools" DEVELOPMENT)
+    all_packages+=("${tmp[@]}")
+    
+    # Productivity
+    mapfile -t tmp < <(select_from_category "Productivity" PRODUCTIVITY)
+    all_packages+=("${tmp[@]}")
+    
+    # Gaming
+    mapfile -t tmp < <(select_from_category "Gaming" GAMING)
+    all_packages+=("${tmp[@]}")
+    
+    # Utilities
+    mapfile -t tmp < <(select_from_category "Utilities" UTILITIES)
+    all_packages+=("${tmp[@]}")
+    
+    # Remove duplicates and empty entries
+    if [ "${#all_packages[@]}" -gt 0 ]; then
+        mapfile -t all_packages < <(printf "%s\n" "${all_packages[@]}" | grep -v '^
 
 main() {
-  echo -e "${BLUE}"
-  echo "╔═══════════════════════════════════════════╗"
-  echo "║      Optional Package Installation        ║"
-  echo "╚═══════════════════════════════════════════╝"
-  echo -e "${NC}"
-
-  # Check if this is a minimal installation (no optional packages)
-  if [ "$INSTALLATION_TYPE" = "minimal" ]; then
-    print_info "Minimal installation selected, skipping optional packages"
+    echo -e "${BLUE}"
+    echo "╔═══════════════════════════════════════════╗"
+    echo "║      Optional Package Installation        ║"
+    echo "╚═══════════════════════════════════════════╝"
+    echo -e "${NC}"
+    
+    # Check if this is a minimal installation (no optional packages)
+    if [ "$INSTALLATION_TYPE" = "minimal" ]; then
+        print_info "Minimal installation selected, skipping optional packages"
+        return 0
+    fi
+    
+    # Ask if user wants to install additional packages
+    echo ""
+    read -p "Install additional software? (Y/n): " -n 1 -r
+    echo
+    
+    if [[ $REPLY =~ ^[Nn]$ ]]; then
+        print_info "Skipping additional software installation"
+        return 0
+    fi
+    
+    # Select installation profile
+    select_installation_profile
+    
+    # Install based on profile
+    case "$INSTALL_PROFILE" in
+        minimal)
+            install_minimal
+            ;;
+        standard)
+            install_standard
+            ;;
+        full)
+            install_full
+            ;;
+        custom)
+            install_custom
+            ;;
+    esac
+    
+    print_success "Optional package installation complete!"
+    
     return 0
-  fi
-
-  # Ask if user wants to install additional packages
-  echo ""
-  read -p "Install additional software? (Y/n): " -n 1 -r
-  echo
-
-  if [[ $REPLY =~ ^[Nn]$ ]]; then
-    print_info "Skipping additional software installation"
-    return 0
-  fi
-
-  # Select installation profile
-  select_installation_profile
-
-  # Install based on profile
-  case "$INSTALL_PROFILE" in
-  minimal)
-    install_minimal
-    ;;
-  standard)
-    install_standard
-    ;;
-  full)
-    install_full
-    ;;
-  custom)
-    install_custom
-    ;;
-  esac
-
-  print_success "Optional package installation complete!"
-
-  return 0
 }
 
 # Run if executed directly
 if [ "${BASH_SOURCE[0]}" -ef "$0" ]; then
-  main "$@"
+    main "$@"
+fi
+ | sort -u)
+    fi
+    
+    if [ "${#all_packages[@]}" -eq 0 ]; then
+        print_info "No packages selected"
+        return 0
+    fi
+    
+    echo ""
+    print_info "Selected packages:"
+    for pkg in "${all_packages[@]}"; do
+        echo "  • $pkg"
+    done
+    echo ""
+    
+    read -p "Proceed with installation? (Y/n): " -n 1 -r
+    echo
+    
+    if [[ $REPLY =~ ^[Nn]$ ]]; then
+        print_info "Package installation cancelled"
+        return 0
+    fi
+    
+    install_packages "${all_packages[@]}"
+}
+
+main() {
+    echo -e "${BLUE}"
+    echo "╔═══════════════════════════════════════════╗"
+    echo "║      Optional Package Installation        ║"
+    echo "╚═══════════════════════════════════════════╝"
+    echo -e "${NC}"
+    
+    # Check if this is a minimal installation (no optional packages)
+    if [ "$INSTALLATION_TYPE" = "minimal" ]; then
+        print_info "Minimal installation selected, skipping optional packages"
+        return 0
+    fi
+    
+    # Ask if user wants to install additional packages
+    echo ""
+    read -p "Install additional software? (Y/n): " -n 1 -r
+    echo
+    
+    if [[ $REPLY =~ ^[Nn]$ ]]; then
+        print_info "Skipping additional software installation"
+        return 0
+    fi
+    
+    # Select installation profile
+    select_installation_profile
+    
+    # Install based on profile
+    case "$INSTALL_PROFILE" in
+        minimal)
+            install_minimal
+            ;;
+        standard)
+            install_standard
+            ;;
+        full)
+            install_full
+            ;;
+        custom)
+            install_custom
+            ;;
+    esac
+    
+    print_success "Optional package installation complete!"
+    
+    return 0
+}
+
+# Run if executed directly
+if [ "${BASH_SOURCE[0]}" -ef "$0" ]; then
+    main "$@"
 fi
