@@ -424,7 +424,7 @@ main() {
 
   # Run installation modules in order
   run_module "00-checks.sh" "Step 1/10: System Checks" || exit 1
-  run_module "10-disk.sh" "Step 2/10: Disk Setup" || exit 1
+  run_module "10-disks.sh" "Step 2/10: Disk Setup" || exit 1
   run_module "20-base.sh" "Step 3/10: Base System Installation" || exit 1
   run_module "30-kernel.sh" "Step 4/10: Kernel Installation" || exit 1
   run_module "40-bootloader.sh" "Step 5/10: Bootloader Setup" || exit 1
