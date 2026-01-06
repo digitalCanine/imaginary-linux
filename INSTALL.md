@@ -396,19 +396,6 @@ paru -S aur-package-name
 - GRUB will detect other Linux installs
 - Use different root partitions
 
-### Encryption
-
-**LUKS Setup:**
-
-- Encrypts entire root partition
-- Password required at boot
-- Protects data if drive is stolen
-
-**Performance impact:**
-
-- Modern CPUs: negligible (<5%)
-- Older systems: may notice slight slowdown
-
 ### Btrfs Snapshots
 
 If you chose btrfs:
