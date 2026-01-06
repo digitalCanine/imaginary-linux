@@ -175,8 +175,12 @@ install_branding() {
 
   print_info "Installing OS identification files..."
 
-  # Install os-release
-  cat >/mnt/etc/os-release <<'EOF'
+  # Ensure directories exist
+  mkdir -p /mnt/usr/lib
+  mkdir -p /mnt/etc
+
+  # Canonical os-release (systemd reads THIS)
+  cat >/mnt/usr/lib/os-release <<'EOF'
 NAME="Imaginary Linux"
 PRETTY_NAME="Imaginary Linux"
 ID=imaginary
@@ -186,12 +190,15 @@ VERSION="1.0.0"
 VERSION_ID="1.0.0"
 VERSION_CODENAME=shamshel
 ANSI_COLOR="38;2;139;69;255"
-HOME_URL="https://github.com/schizopup/imaginary-linux"
-DOCUMENTATION_URL="https://github.com/schizopup/imaginary-linux"
-SUPPORT_URL="https://github.com/schizopup/imaginary-linux/issues"
-BUG_REPORT_URL="https://github.com/schizopup/imaginary-linux/issues"
+HOME_URL="https://github.com/digitalcanine/imaginary-linux"
+DOCUMENTATION_URL="https://github.com/digitalcanine/imaginary-linux"
+SUPPORT_URL="https://github.com/digitalcanine/imaginary-linux/issues"
+BUG_REPORT_URL="https://github.com/digitalcanine/imaginary-linux/issues"
 LOGO=imaginary
 EOF
+
+  # /etc/os-release should be a symlink
+  ln -sf ../usr/lib/os-release /mnt/etc/os-release
 
   # Install lsb-release
   cat >/mnt/etc/lsb-release <<'EOF'
@@ -209,9 +216,6 @@ IMAGINARY_ANGEL="Shamshel"
 IMAGINARY_BUILD_DATE="2026-01-07"
 IMAGINARY_PHILOSOPHY="Protection through awareness"
 EOF
-
-  # Create symlink
-  ln -sf /etc/os-release /mnt/usr/lib/os-release
 
   print_success "OS identification files installed"
 
@@ -352,7 +356,7 @@ EOF
     Version 1.0.0 (Shamshel)
 
 Welcome to Imaginary Linux - A transformative Arch-based system
-Documentation: https://github.com/schizopup/imaginary-linux
+Documentation: https://github.com/digitalcanine/imaginary-linux
 
 EOF
 
