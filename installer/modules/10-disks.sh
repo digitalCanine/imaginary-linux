@@ -2,7 +2,7 @@
 # Module 10: Disk Partitioning and Setup (SAFE / REUSE AWARE)
 # Supports fresh installs AND reinstall without data loss
 
-# ================= COLORS =================
+# Colors
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
@@ -15,12 +15,12 @@ print_success() { echo -e "${GREEN}[✓]${NC} $1"; }
 print_warning() { echo -e "${YELLOW}[!]${NC} $1"; }
 print_error() { echo -e "${RED}[✗]${NC} $1"; }
 
-# ================= STATE =================
+# State
 declare -a ADDITIONAL_PARTS
 declare -a ADDITIONAL_MOUNTS
 declare -a ADDITIONAL_FORMAT
 
-# ================= DISK SELECTION =================
+# Disk selection
 list_disks() {
   lsblk -ndo NAME,SIZE,TYPE,MODEL | grep disk
 }
@@ -46,7 +46,7 @@ select_disk() {
   export DISK
 }
 
-# ================= PARTITION MODE =================
+# Partition mode
 select_partitioning_mode() {
   echo ""
   echo "Partitioning mode:"
@@ -67,7 +67,7 @@ select_partitioning_mode() {
   export PARTITION_MODE
 }
 
-# ================= FORMAT MODE =================
+# Format mode
 select_partition_handling() {
   echo ""
   echo "Partition handling:"
@@ -88,7 +88,7 @@ select_partition_handling() {
   export FORMAT_PARTITIONS
 }
 
-# ================= FILESYSTEM =================
+# File systems
 select_filesystem() {
   echo ""
   echo "Root filesystem:"
@@ -111,7 +111,7 @@ select_filesystem() {
   export ROOT_FS
 }
 
-# ================= MANUAL PARTITIONS =================
+# Manual partition
 manual_partition() {
   print_info "Manual partition selection"
   lsblk "$DISK"
@@ -131,7 +131,7 @@ manual_partition() {
   export EFI_PART ROOT_PART HOME_PART
 }
 
-# ================= AUTO PARTITION =================
+# Auto partition
 auto_partition_uefi() {
   print_warning "Disk WILL be wiped"
   wipefs -af "$DISK"
@@ -152,7 +152,7 @@ auto_partition_uefi() {
   export EFI_PART ROOT_PART
 }
 
-# ================= FORMAT =================
+# Format partitions
 format_partitions() {
   [ "$FORMAT_PARTITIONS" = false ] && {
     print_info "Skipping formatting"
@@ -172,7 +172,7 @@ format_partitions() {
   fi
 }
 
-# ================= MOUNT =================
+# mount_partitions
 mount_partitions() {
   mount "$ROOT_PART" /mnt
 
@@ -189,7 +189,7 @@ mount_partitions() {
   print_success "Partitions mounted"
 }
 
-# ================= MAIN =================
+# Main
 main() {
   echo -e "${BLUE}"
   echo "╔══════════════════════════════════════╗"

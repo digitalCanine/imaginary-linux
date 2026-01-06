@@ -186,8 +186,8 @@ PRETTY_NAME="Imaginary Linux"
 ID=imaginary
 ID_LIKE=arch
 BUILD_ID=rolling
-VERSION="1.0.0"
-VERSION_ID="1.0.0"
+VERSION="1.1.0"
+VERSION_ID="1.1.0"
 VERSION_CODENAME=shamshel
 ANSI_COLOR="38;2;139;69;255"
 HOME_URL="https://github.com/digitalcanine/imaginary-linux"
@@ -210,7 +210,7 @@ EOF
 
   # Install imaginary-release
   cat >/mnt/etc/imaginary-release <<'EOF'
-IMAGINARY_VERSION="1.0.0"
+IMAGINARY_VERSION="1.1.0"
 IMAGINARY_CODENAME="Shamshel"
 IMAGINARY_ANGEL="Shamshel"
 IMAGINARY_BUILD_DATE="2026-01-07"
@@ -253,86 +253,68 @@ EOF
 
   cat >/mnt/etc/fastfetch/config.jsonc <<'EOF'
 {
-    "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-    "logo": {
-        "type": "file",
-        "source": "/usr/share/imaginary/logo.txt",
-        "color": {
-            "1": "magenta",
-            "2": "blue"
-        }
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "file",
+    "source": "/usr/share/imaginary/logo.txt",
+    "padding": {
+      "top": 1,
+      "right": 4
+    }
+  },
+  "separator": "  ",
+  "keyWidth": 12,
+  "modules": [
+    {
+      "type": "custom",
+      "format": "\u001b[1m\u001b[38;2;225;196;125m✧ IMAGINARY SYSTEM ✧\u001b[0m"
     },
-    "display": {
-        "separator": " → "
+    {
+      "type": "custom",
+      "format": "\u001b[38;2;225;196;125mVersion\u001b[0m: \u001b[38;2;254;255;211m{version} · {codename}\u001b[0m"
     },
-    "modules": [
-        {
-            "type": "title",
-            "format": "{user-name-colored}@{host-name-colored}"
-        },
-        {
-            "type": "separator"
-        },
-        {
-            "type": "os",
-            "key": "OS"
-        },
-        {
-            "type": "kernel",
-            "key": "Kernel"
-        },
-        {
-            "type": "uptime",
-            "key": "Uptime"
-        },
-        {
-            "type": "packages",
-            "key": "Packages"
-        },
-        {
-            "type": "shell",
-            "key": "Shell"
-        },
-        {
-            "type": "display",
-            "key": "Resolution"
-        },
-        {
-            "type": "de",
-            "key": "DE"
-        },
-        {
-            "type": "wm",
-            "key": "WM"
-        },
-        {
-            "type": "terminal",
-            "key": "Terminal"
-        },
-        {
-            "type": "cpu",
-            "key": "CPU"
-        },
-        {
-            "type": "gpu",
-            "key": "GPU"
-        },
-        {
-            "type": "memory",
-            "key": "Memory"
-        },
-        {
-            "type": "disk",
-            "key": "Disk"
-        },
-        {
-            "type": "separator"
-        },
-        {
-            "type": "colors",
-            "symbol": "circle"
-        }
-    ]
+    "break",
+    {
+      "type": "os",
+      "key": "\u001b[38;2;119;130;132mOS\u001b[0m",
+      "format": "Imaginary Linux"
+    },
+    {
+      "type": "kernel",
+      "key": "\u001b[38;2;119;130;132mKernel\u001b[0m"
+    },
+    {
+      "type": "uptime",
+      "key": "\u001b[38;2;119;130;132mUptime\u001b[0m"
+    },
+    "break",
+    {
+      "type": "wm",
+      "key": "\u001b[38;2;90;93;97mWM\u001b[0m"
+    },
+    {
+      "type": "terminal",
+      "key": "\u001b[38;2;90;93;97mTerminal\u001b[0m"
+    },
+    {
+      "type": "shell",
+      "key": "\u001b[38;2;90;93;97mShell\u001b[0m"
+    },
+    "break",
+    {
+      "type": "cpu",
+      "key": "\u001b[38;2;175;185;121mCPU\u001b[0m"
+    },
+    {
+      "type": "memory",
+      "key": "\u001b[38;2;175;185;121mMemory\u001b[0m"
+    },
+    "break",
+    {
+      "type": "custom",
+      "format": "\u001b[38;2;119;130;132m⸻ the system stands, quietly ⸻\u001b[0m"
+    }
+  ]
 }
 EOF
 
