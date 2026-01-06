@@ -113,14 +113,9 @@ install_kernel() {
 configure_mkinitcpio() {
   print_info "Configuring initramfs..."
 
-  # Check if encryption was used
-  if [ "$ENCRYPTED_ROOT" = "true" ]; then
-    print_info "Adding encryption support to initramfs..."
-
-    # Add encrypt hook
-    arch-chroot /mnt sed -i 's/^HOOKS=.*/HOOKS=(base udev autodetect modconf kms keyboard keymap consolefont block encrypt filesystems fsck)/' /etc/mkinitcpio.conf
-
-    print_success "Encryption support added to initramfs"
+  # Ensure /etc/vconsole.conf exists with default keymap
+  if [ ! -f /mnt/etc/vconsole.conf ]; then
+    echo "KEYMAP=us" >/mnt/etc/vconsole.conf
   fi
 
   # Check if btrfs was used
