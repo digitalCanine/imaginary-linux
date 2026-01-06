@@ -1,6 +1,6 @@
 # Imaginary Linux Installation Guide
 
-**Version 1.0 (Shamshel)**
+**Version 1.1.6 (Shamshel)**
 
 This guide will walk you through installing Imaginary Linux on your system.
 
