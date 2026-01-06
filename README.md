@@ -147,7 +147,7 @@ See [INSTALL.md](INSTALL.md) for detailed installation instructions.
 - System utilities
 - Multimedia support
 
-### Optional Packages
+### Optional Packages (CURRENTLY NOT WORKING)
 
 Choose from curated categories:
 
@@ -157,23 +157,6 @@ Choose from curated categories:
 - Development tools (Docker, Git, GitHub CLI)
 - Gaming (Steam, Lutris, Wine)
 - And more...
-
----
-
-## 🎨 Customization
-
-### BSPWM Rice
-
-If you select BSPWM during installation, you can optionally install the **Imaginary BSPWM rice** - a pre-configured, beautiful setup featuring:
-
-- Custom keybindings
-- Polybar status bar
-- Picom compositor
-- Rofi launcher
-- Coordinated color scheme
-- And more!
-
-The rice repository: [bspwm-rice](https://github.com/schizopup/bspwm-rice)
 
 ---
 
@@ -213,22 +196,29 @@ Optional security hardening includes:
 
 ---
 
-## 🔄 Version History
+## 🔄 Version
 
 ### Version 1.1.6 (Shamshel) - Current
 
-- Initial public release
+- Initial real public release
 - Automated installer
 - 7 desktop environment options
 - Security hardening features
-- Custom BSPWM rice
 - UEFI and BIOS support
+- Imaginary Angel script bundled in
 
-Future versions will follow Evangelion angel naming:
+### Roadmap to version 2.X.X (Ramiel)
 
-- **1.x (Shamshel)** - Current stable series
-- **2.x (Ramiel)** - Future major release
-- And so on...
+- [] Custom kernel
+- [] Imaginary Angel 2.0.0
+- [] Better hardening
+- [] More angelic theming
+
+### Version history
+
+- 0.5.6 (Sachiel) - First prototype of the OS
+- **1.1.6 (Shamshel)** - Current stable series
+- 2.X.X (Ramiel) - Future major release
 
 ---
 
@@ -272,13 +262,3 @@ The Linux kernel and included packages retain their original licenses.
 ## ⚠️ Disclaimer
 
 Imaginary Linux is provided as-is without warranty. This is a hobby project created for personal use and shared with the community. Always backup your data before installation.
-
----
-
-<div align="center">
-
-**Imaginary Linux** - *Turning imagination into reality, one install at a time.*
-
-Made with ❤️ by the community
-
-</div>
