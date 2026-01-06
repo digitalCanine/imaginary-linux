@@ -74,7 +74,7 @@ update_mirrorlist() {
   fi
 
   # Update package database again with new mirrors
-  pacman -Sy
+  pacman -Sy archlinux-keyring
 }
 
 install_base_packages() {
