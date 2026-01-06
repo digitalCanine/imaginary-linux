@@ -101,50 +101,45 @@ declare -A UTILITIES=(
 )
 
 select_from_category() {
-  local category_name="$1"
-  local -n category="$2"
-
-  local pkg_names=()
+  local category_name=$1
+  local -n category=$2
   local selected_packages=()
 
-  {
-    echo ""
-    echo -e "${BLUE}═══ $category_name ═══${NC}"
-    echo ""
-  } >&2
+  echo ""
+  echo -e "${BLUE}═══ $category_name ═══${NC}"
+  echo ""
 
   local index=1
+  local pkg_names=()
+
   for pkg in "${!category[@]}"; do
-    {
-      echo "$index) $pkg - ${category[$pkg]}"
-    } >&2
+    echo "  $index) $pkg"
+    echo "     ${category[$pkg]}"
+    echo ""
     pkg_names+=("$pkg")
     ((index++))
   done
+  echo "  0) Skip this category"
+  echo "  a) Install all from this category"
+  echo ""
 
-  {
-    echo "0) Skip this category"
-    echo "a) Install all"
-    echo ""
-    read -p "Select packages (space-separated numbers, 'a', or '0'): " selection
-  } >&2
+  read -p "Select packages (space-separated numbers, 'a' for all, or '0' to skip): " selection
 
-  if [[ "$selection" == "0" ]]; then
+  if [ "$selection" = "0" ]; then
     return 0
+  elif [ "$selection" = "a" ] || [ "$selection" = "A" ]; then
+    selected_packages=("${pkg_names[@]}")
+  else
+    for num in $selection; do
+      if [[ "$num" =~ ^[0-9]+$ ]] && [ "$num" -gt 0 ] && [ "$num" -lt "$index" ]; then
+        selected_packages+=("${pkg_names[$((num - 1))]}")
+      fi
+    done
   fi
 
-  if [[ "$selection" =~ ^[aA]$ ]]; then
-    printf '%s\n' "${pkg_names[@]}"
-    return 0
+  if [ ${#selected_packages[@]} -gt 0 ]; then
+    echo "${selected_packages[@]}"
   fi
-
-  for num in $selection; do
-    if [[ "$num" =~ ^[0-9]+$ ]] && ((num >= 1 && num < index)); then
-      selected_packages+=("${pkg_names[num - 1]}")
-    fi
-  done
-
-  printf '%s\n' "${selected_packages[@]}"
 }
 
 install_packages() {
@@ -317,83 +312,99 @@ install_custom() {
   print_info "Custom package selection..."
 
   local all_packages=()
-  local tmp=()
 
-  read -p "Do you want to manually select packages? (Y/n): " -n 1 -r
-  echo
-  if [[ $REPLY =~ ^[Nn]$ ]]; then
-    print_info "Skipping custom package selection"
-    return 0
+  # Show instructions
+  echo ""
+  echo "For each category:"
+  echo "  - Enter numbers separated by spaces (e.g., '1 3 5')"
+  echo "  - Enter 'a' to install all from category"
+  echo "  - Enter '0' to skip category"
+  echo ""
+  read -p "Press Enter to continue..." dummy
+
+  # Browser selection
+  if [ ${#BROWSERS[@]} -gt 0 ]; then
+    local browser_pkgs=$(select_from_category "Web Browsers" BROWSERS)
+    all_packages+=($browser_pkgs)
   fi
 
-  # Web Browsers
-  mapfile -t tmp < <(select_from_category "Web Browsers" BROWSERS)
-  all_packages+=("${tmp[@]}")
+  # Terminal selection
+  if [ ${#TERMINALS[@]} -gt 0 ]; then
+    local terminal_pkgs=$(select_from_category "Terminal Emulators" TERMINALS)
+    all_packages+=($terminal_pkgs)
+  fi
 
-  # Terminals
-  mapfile -t tmp < <(select_from_category "Terminal Emulators" TERMINALS)
-  all_packages+=("${tmp[@]}")
+  # Editor selection
+  if [ ${#EDITORS[@]} -gt 0 ]; then
+    local editor_pkgs=$(select_from_category "Text Editors" EDITORS)
+    all_packages+=($editor_pkgs)
+  fi
 
-  # Editors
-  mapfile -t tmp < <(select_from_category "Text Editors" EDITORS)
-  all_packages+=("${tmp[@]}")
+  # File manager selection
+  if [ ${#FILE_MANAGERS[@]} -gt 0 ]; then
+    local fm_pkgs=$(select_from_category "File Managers" FILE_MANAGERS)
+    all_packages+=($fm_pkgs)
+  fi
 
-  # File Managers
-  mapfile -t tmp < <(select_from_category "File Managers" FILE_MANAGERS)
-  all_packages+=("${tmp[@]}")
+  # Media player selection
+  if [ ${#MEDIA_PLAYERS[@]} -gt 0 ]; then
+    local media_pkgs=$(select_from_category "Media Players" MEDIA_PLAYERS)
+    all_packages+=($media_pkgs)
+  fi
 
-  # Media Players
-  mapfile -t tmp < <(select_from_category "Media Players" MEDIA_PLAYERS)
-  all_packages+=("${tmp[@]}")
+  # Graphics selection
+  if [ ${#GRAPHICS[@]} -gt 0 ]; then
+    local graphics_pkgs=$(select_from_category "Graphics Software" GRAPHICS)
+    all_packages+=($graphics_pkgs)
+  fi
 
-  # Graphics
-  mapfile -t tmp < <(select_from_category "Graphics Software" GRAPHICS)
-  all_packages+=("${tmp[@]}")
+  # Communication selection
+  if [ ${#COMMUNICATION[@]} -gt 0 ]; then
+    local comm_pkgs=$(select_from_category "Communication" COMMUNICATION)
+    all_packages+=($comm_pkgs)
+  fi
 
-  # Communication
-  mapfile -t tmp < <(select_from_category "Communication" COMMUNICATION)
-  all_packages+=("${tmp[@]}")
+  # Development selection
+  if [ ${#DEVELOPMENT[@]} -gt 0 ]; then
+    local dev_pkgs=$(select_from_category "Development Tools" DEVELOPMENT)
+    all_packages+=($dev_pkgs)
+  fi
 
-  # Development
-  mapfile -t tmp < <(select_from_category "Development Tools" DEVELOPMENT)
-  all_packages+=("${tmp[@]}")
+  # Productivity selection
+  if [ ${#PRODUCTIVITY[@]} -gt 0 ]; then
+    local prod_pkgs=$(select_from_category "Productivity" PRODUCTIVITY)
+    all_packages+=($prod_pkgs)
+  fi
 
-  # Productivity
-  mapfile -t tmp < <(select_from_category "Productivity" PRODUCTIVITY)
-  all_packages+=("${tmp[@]}")
+  # Gaming selection
+  if [ ${#GAMING[@]} -gt 0 ]; then
+    local gaming_pkgs=$(select_from_category "Gaming" GAMING)
+    all_packages+=($gaming_pkgs)
+  fi
 
-  # Gaming
-  mapfile -t tmp < <(select_from_category "Gaming" GAMING)
-  all_packages+=("${tmp[@]}")
+  # Utilities selection
+  if [ ${#UTILITIES[@]} -gt 0 ]; then
+    local util_pkgs=$(select_from_category "Utilities" UTILITIES)
+    all_packages+=($util_pkgs)
+  fi
 
-  # Utilities
-  mapfile -t tmp < <(select_from_category "Utilities" UTILITIES)
-  all_packages+=("${tmp[@]}")
+  # Install all selected packages
+  if [ ${#all_packages[@]} -gt 0 ]; then
+    echo ""
+    print_info "Selected packages:"
+    printf '  - %s\n' "${all_packages[@]}"
+    echo ""
+    read -p "Proceed with installation? (Y/n): " -n 1 -r
+    echo
 
-  # Remove duplicates (important!)
-  mapfile -t all_packages < <(printf "%s\n" "${all_packages[@]}" | sort -u)
-
-  if [ "${#all_packages[@]}" -eq 0 ]; then
+    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+      install_packages "${all_packages[@]}"
+    else
+      print_info "Package installation cancelled"
+    fi
+  else
     print_info "No packages selected"
-    return 0
   fi
-
-  echo ""
-  print_info "Selected packages:"
-  for pkg in "${all_packages[@]}"; do
-    echo "  • $pkg"
-  done
-  echo ""
-
-  read -p "Proceed with installation? (Y/n): " -n 1 -r
-  echo
-
-  if [[ $REPLY =~ ^[Nn]$ ]]; then
-    print_info "Package installation cancelled"
-    return 0
-  fi
-
-  install_packages "${all_packages[@]}"
 }
 
 main() {
