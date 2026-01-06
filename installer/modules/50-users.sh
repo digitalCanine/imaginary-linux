@@ -23,8 +23,8 @@ print_error() {
 
 get_hostname() {
   echo ""
-  print_info "Enter a name for the vessel"
-  print_info "This is the name that will identify your vessel on networks"
+  print_info "Enter hostname for this system"
+  print_info "This is the name that will identify your computer on networks"
 
   while true; do
     read -p "Hostname: " HOSTNAME
@@ -37,14 +37,14 @@ get_hostname() {
 
     # Check if hostname is valid (alphanumeric and hyphens only)
     if [[ ! "$HOSTNAME" =~ ^[a-zA-Z0-9]([a-zA-Z0-9-]*[a-zA-Z0-9])?$ ]]; then
-      print_error "Invalid name. Use only letters, numbers, and hyphens"
+      print_error "Invalid hostname. Use only letters, numbers, and hyphens"
       print_info "Hostname must start and end with a letter or number"
       continue
     fi
 
     # Confirm hostname
     echo ""
-    echo "Vessel name will be: $HOSTNAME"
+    echo "Hostname will be: $HOSTNAME"
     read -p "Is this correct? (Y/n): " -n 1 -r
     echo
 
@@ -59,8 +59,8 @@ get_hostname() {
 
 get_username() {
   echo ""
-  print_info "Enter the name of its resident"
-  print_info "This will be your privileged link"
+  print_info "Enter username for your account"
+  print_info "This will be your primary user account with sudo privileges"
 
   while true; do
     read -p "Username: " USERNAME
@@ -90,7 +90,7 @@ get_username() {
 
     # Confirm username
     echo ""
-    echo "Your name will be: $USERNAME"
+    echo "Username will be: $USERNAME"
     read -p "Is this correct? (Y/n): " -n 1 -r
     echo
 
@@ -100,12 +100,12 @@ get_username() {
     fi
   done
 
-  print_success "Name set to: $USERNAME"
+  print_success "Username set to: $USERNAME"
 }
 
 get_user_password() {
   echo ""
-  print_info "Set an access key for user: $USERNAME"
+  print_info "Set password for user: $USERNAME"
   print_info "Password must be at least 8 characters"
 
   while true; do
@@ -130,15 +130,16 @@ get_user_password() {
     break
   done
 
-  print_success "User access key set"
+  print_success "User password set"
 }
 
 get_root_password() {
   echo ""
-  print_info "Set the system administrator key"
+  print_info "Set root password"
+  print_info "This is the system administrator password"
 
   while true; do
-    read -p "Use same key as user account? (Y/n): " -n 1 -r
+    read -p "Use same password as user account? (Y/n): " -n 1 -r
     echo
 
     if [[ ! $REPLY =~ ^[Nn]$ ]]; then
@@ -166,7 +167,7 @@ get_root_password() {
         fi
 
         export ROOT_PASSWORD
-        print_success "Root access key set"
+        print_success "Root password set"
         break
       done
       break
@@ -175,7 +176,7 @@ get_root_password() {
 }
 
 configure_hostname() {
-  print_info "Configuring the vessel name..."
+  print_info "Configuring hostname..."
 
   # Set hostname
   echo "$HOSTNAME" >/mnt/etc/hostname
@@ -191,7 +192,7 @@ EOF
 }
 
 create_user() {
-  print_info "Creating user presence: $USERNAME"
+  print_info "Creating user account: $USERNAME"
 
   # Create user with home directory
   arch-chroot /mnt useradd -m -G wheel,audio,video,optical,storage -s /bin/bash "$USERNAME"
@@ -209,11 +210,11 @@ create_user() {
     return 1
   fi
 
-  print_success "User presence created: $USERNAME"
+  print_success "User account created: $USERNAME"
 }
 
 set_root_password() {
-  print_info "Setting root access key..."
+  print_info "Setting root password..."
 
   echo "root:$ROOT_PASSWORD" | arch-chroot /mnt chpasswd
 
@@ -222,11 +223,22 @@ set_root_password() {
     return 1
   fi
 
-  print_success "Root password set"
+  # Ensure root account is unlocked
+  arch-chroot /mnt passwd -u root
+
+  # Verify root password is set and unlocked
+  local root_status=$(arch-chroot /mnt passwd --status root | awk '{print $2}')
+  if [ "$root_status" = "P" ]; then
+    print_success "Root password set and account unlocked"
+  else
+    print_error "Root account status: $root_status (should be P)"
+    print_warning "Attempting to unlock root account..."
+    arch-chroot /mnt passwd -u root
+  fi
 }
 
 configure_sudo() {
-  print_info "Configuring privileged access..."
+  print_info "Configuring sudo access..."
 
   # Enable wheel group for sudo
   arch-chroot /mnt sed -i 's/^# %wheel ALL=(ALL:ALL) ALL/%wheel ALL=(ALL:ALL) ALL/' /etc/sudoers
@@ -243,7 +255,7 @@ configure_sudo() {
 display_summary() {
   echo ""
   echo -e "${BLUE}═══════════════════════════════════════${NC}"
-  echo -e "${BLUE}    Identity Manifest${NC}"
+  echo -e "${BLUE}    User Configuration Summary${NC}"
   echo -e "${BLUE}═══════════════════════════════════════${NC}"
   echo -e "Hostname: ${GREEN}$HOSTNAME${NC}"
   echo -e "Username: ${GREEN}$USERNAME${NC}"
@@ -257,7 +269,7 @@ display_summary() {
 main() {
   echo -e "${BLUE}"
   echo "╔═══════════════════════════════════════════╗"
-  echo "║             Identity Creation             ║"
+  echo "║       User Account Configuration          ║"
   echo "╚═══════════════════════════════════════════╝"
   echo -e "${NC}"
 
@@ -270,7 +282,7 @@ main() {
   # Display summary and confirm
   display_summary
 
-  read -p "Proceed with formation? (Y/n): " -n 1 -r
+  read -p "Create user with these settings? (Y/n): " -n 1 -r
   echo
 
   if [[ $REPLY =~ ^[Nn]$ ]]; then
