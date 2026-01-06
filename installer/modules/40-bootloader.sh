@@ -1,6 +1,6 @@
 #!/bin/bash
 # Module 40: Bootloader Installation
-# Installs and configures bootloader (GRUB, systemd-boot, or libreboot)
+# Installs and configures bootloader (GRUB or systemd-boot)
 
 # Colors
 RED='\033[0;31m'
@@ -25,156 +25,100 @@ print_error() {
   echo -e "${RED}[✗]${NC} $1"
 }
 
-list_bootloaders() {
+select_bootloader() {
   echo ""
   echo -e "${BLUE}╔═══════════════════════════════════════════╗${NC}"
-  echo -e "${BLUE}║         Bootloader Selection              ║${NC}"
+  echo -e "${BLUE}║       Bootloader Selection                ║${NC}"
   echo -e "${BLUE}╚═══════════════════════════════════════════╝${NC}"
   echo ""
 
   if [ "$BOOT_MODE" = "UEFI" ]; then
-    echo "UEFI mode detected - Available bootloaders:"
+    echo "UEFI boot detected. Available bootloaders:"
+    echo "1) systemd-boot (recommended for UEFI)"
+    echo "2) GRUB"
     echo ""
-    echo "1) systemd-boot   - Simple, fast (recommended for UEFI)"
-    echo "                    Minimal, integrated with systemd"
-    echo ""
-    echo "2) GRUB           - Traditional, feature-rich"
-    echo "                    Better for dual-boot, theme support"
-    echo ""
-    echo "3) libreboot      - Free BIOS replacement (advanced)"
-    echo "                    Requires compatible hardware"
-    echo ""
-  else
-    echo "BIOS mode detected - Available bootloaders:"
-    echo ""
-    echo "1) GRUB           - Standard BIOS bootloader"
-    echo "                    Reliable and widely supported"
-    echo ""
-    print_warning "systemd-boot requires UEFI"
-    print_warning "libreboot requires specific hardware"
-  fi
-}
 
-select_bootloader() {
-  list_bootloaders
+    while true; do
+      read -p "Select bootloader [1-2]: " choice
 
-  while true; do
-    if [ "$BOOT_MODE" = "UEFI" ]; then
-      read -p "Select bootloader [1-3]: " choice
-    else
-      read -p "Select bootloader [1]: " choice
-      choice=1 # Force GRUB for BIOS
-    fi
-
-    case $choice in
-    1)
-      if [ "$BOOT_MODE" = "UEFI" ]; then
-        SELECTED_BOOTLOADER="systemd-boot"
-        BOOTLOADER_NAME="systemd-boot"
-      else
-        SELECTED_BOOTLOADER="grub"
-        BOOTLOADER_NAME="GRUB"
-      fi
-      break
-      ;;
-    2)
-      if [ "$BOOT_MODE" = "UEFI" ]; then
-        SELECTED_BOOTLOADER="grub"
-        BOOTLOADER_NAME="GRUB"
+      case $choice in
+      1)
+        BOOTLOADER="systemd-boot"
+        print_success "Selected: systemd-boot"
         break
-      else
-        print_error "Invalid selection for BIOS mode"
-        continue
-      fi
-      ;;
-    3)
-      if [ "$BOOT_MODE" = "UEFI" ]; then
-        SELECTED_BOOTLOADER="libreboot"
-        BOOTLOADER_NAME="libreboot"
-        print_warning "libreboot requires compatible hardware"
-        echo ""
-        read -p "Is your system libreboot-compatible? (y/N): " -n 1 -r
-        echo
-        if [[ $REPLY =~ ^[Yy]$ ]]; then
-          break
-        else
-          print_info "Please select a different bootloader"
-          continue
-        fi
-      else
-        print_error "Invalid selection for BIOS mode"
-        continue
-      fi
-      ;;
-    *)
-      print_error "Invalid selection"
-      continue
-      ;;
-    esac
-  done
+        ;;
+      2)
+        BOOTLOADER="grub"
+        print_success "Selected: GRUB"
+        break
+        ;;
+      *)
+        print_error "Invalid selection"
+        ;;
+      esac
+    done
+  else
+    print_info "BIOS boot detected. Using GRUB (only option for BIOS)"
+    BOOTLOADER="grub"
+  fi
 
-  print_success "Selected: $BOOTLOADER_NAME"
-  export SELECTED_BOOTLOADER
-  export BOOTLOADER_NAME
+  export BOOTLOADER
 }
 
-find_root_device() {
-  print_info "Detecting root device..."
-
-  # Find root partition
-  ROOT_PART=$(mount | grep "on /mnt " | awk '{print $1}')
-
-  if [ -z "$ROOT_PART" ]; then
-    print_error "Could not detect root partition"
-    return 1
-  fi
-
-  # Get UUID
+detect_root_partition() {
+  # Get root partition and its UUID
+  ROOT_PART=$(findmnt -n -o SOURCE /mnt)
   ROOT_UUID=$(blkid -s UUID -o value "$ROOT_PART")
+  ROOT_PARTUUID=$(blkid -s PARTUUID -o value "$ROOT_PART")
 
-  if [ -z "$ROOT_UUID" ]; then
-    print_error "Could not get root partition UUID"
-    return 1
-  fi
+  print_info "Root partition: $ROOT_PART"
+  print_info "Root UUID: $ROOT_UUID"
+  print_info "Root PARTUUID: $ROOT_PARTUUID"
 
-  print_success "Root partition: $ROOT_PART (UUID: $ROOT_UUID)"
   export ROOT_PART
   export ROOT_UUID
-
-  return 0
+  export ROOT_PARTUUID
 }
 
-find_efi_partition() {
-  print_info "Detecting EFI partition..."
-
-  # Find EFI partition
-  EFI_PART=$(mount | grep "on /mnt/boot " | awk '{print $1}')
-
-  if [ -z "$EFI_PART" ]; then
-    print_warning "EFI partition not mounted at /mnt/boot"
-    print_info "Looking for /mnt/efi..."
-    EFI_PART=$(mount | grep "on /mnt/efi " | awk '{print $1}')
+detect_boot_partition() {
+  # Try to detect boot partition
+  if [ "$BOOT_MODE" = "UEFI" ]; then
+    # Check if /mnt/efi or /mnt/boot is mounted
+    if mountpoint -q /mnt/efi; then
+      BOOT_MOUNT="/efi"
+      BOOT_PART=$(findmnt -n -o SOURCE /mnt/efi)
+    elif mountpoint -q /mnt/boot; then
+      BOOT_MOUNT="/boot"
+      BOOT_PART=$(findmnt -n -o SOURCE /mnt/boot)
+    else
+      print_warning "No separate boot partition detected"
+      BOOT_MOUNT="/boot"
+      BOOT_PART=""
+    fi
+  else
+    BOOT_MOUNT="/boot"
+    if mountpoint -q /mnt/boot; then
+      BOOT_PART=$(findmnt -n -o SOURCE /mnt/boot)
+    else
+      BOOT_PART=""
+    fi
   fi
 
-  if [ -z "$EFI_PART" ]; then
-    print_error "Could not detect EFI partition"
-    return 1
+  if [ -n "$BOOT_PART" ]; then
+    print_info "Boot partition: $BOOT_PART mounted at $BOOT_MOUNT"
+  else
+    print_info "Boot partition: Using root partition"
   fi
 
-  print_success "EFI partition: $EFI_PART"
-  export EFI_PART
-
-  return 0
+  export BOOT_MOUNT
+  export BOOT_PART
 }
 
 install_systemd_boot() {
   print_info "Installing systemd-boot..."
 
-  # Find EFI partition
-  find_efi_partition || return 1
-
-  # Install bootloader
-  arch-chroot /mnt bootctl install
+  # Install systemd-boot to EFI partition
+  arch-chroot /mnt bootctl --esp-path="$BOOT_MOUNT" install
 
   if [ $? -ne 0 ]; then
     print_error "Failed to install systemd-boot"
@@ -183,40 +127,55 @@ install_systemd_boot() {
 
   print_success "systemd-boot installed"
 
-  # Configure loader
+  # Create loader configuration
   print_info "Configuring systemd-boot..."
 
-  cat >/mnt/boot/loader/loader.conf <<EOF
+  cat >/mnt"$BOOT_MOUNT"/loader/loader.conf <<'EOF'
 default  imaginary.conf
 timeout  4
 console-mode max
 editor   no
 EOF
 
-  # Create boot entry
-  local root_param="root=UUID=$ROOT_UUID"
+  print_success "loader.conf created"
 
-  # Add encryption parameters if needed
-  if [ "$ENCRYPTED_ROOT" = "true" ]; then
-    root_param="cryptdevice=UUID=$ROOT_UUID:cryptroot root=/dev/mapper/cryptroot"
+  # Create boot entry
+  print_info "Creating boot entry..."
+
+  # Detect kernel
+  if ls /mnt/boot/vmlinuz-linux-hardened &>/dev/null; then
+    KERNEL_NAME="linux-hardened"
+    KERNEL_PATH="/vmlinuz-linux-hardened"
+    INITRAMFS_PATH="/initramfs-linux-hardened.img"
+  elif ls /mnt/boot/vmlinuz-linux-zen &>/dev/null; then
+    KERNEL_NAME="linux-zen"
+    KERNEL_PATH="/vmlinuz-linux-zen"
+    INITRAMFS_PATH="/initramfs-linux-zen.img"
+  elif ls /mnt/boot/vmlinuz-linux-lts &>/dev/null; then
+    KERNEL_NAME="linux-lts"
+    KERNEL_PATH="/vmlinuz-linux-lts"
+    INITRAMFS_PATH="/initramfs-linux-lts.img"
+  else
+    KERNEL_NAME="linux"
+    KERNEL_PATH="/vmlinuz-linux"
+    INITRAMFS_PATH="/initramfs-linux.img"
   fi
 
-  cat >/mnt/boot/loader/entries/imaginary.conf <<EOF
+  print_info "Detected kernel: $KERNEL_NAME"
+
+  # Create entry file
+  cat >/mnt"$BOOT_MOUNT"/loader/entries/imaginary.conf <<EOF
 title   Imaginary Linux
-linux   /vmlinuz-$SELECTED_KERNEL
-initrd  /initramfs-$SELECTED_KERNEL.img
-options $root_param rw quiet splash
+linux   $KERNEL_PATH
+initrd  $INITRAMFS_PATH
+options root=PARTUUID=$ROOT_PARTUUID rw quiet loglevel=3
 EOF
 
-  # Add fallback entry
-  cat >/mnt/boot/loader/entries/imaginary-fallback.conf <<EOF
-title   Imaginary Linux (fallback)
-linux   /vmlinuz-$SELECTED_KERNEL
-initrd  /initramfs-$SELECTED_KERNEL-fallback.img
-options $root_param rw
-EOF
+  print_success "Boot entry created: imaginary.conf"
 
-  print_success "systemd-boot configured"
+  # Show the entry
+  print_info "Boot entry content:"
+  cat /mnt"$BOOT_MOUNT"/loader/entries/imaginary.conf
 
   return 0
 }
@@ -224,24 +183,28 @@ EOF
 install_grub_uefi() {
   print_info "Installing GRUB for UEFI..."
 
-  # Find EFI partition
-  find_efi_partition || return 1
-
-  # Install GRUB packages
+  # Install GRUB package
   arch-chroot /mnt pacman -S --noconfirm --needed grub efibootmgr
 
-  # Install GRUB to EFI
-  arch-chroot /mnt grub-install --target=x86_64-efi --efi-directory=/boot --bootloader-id=IMAGINARY
+  # Install GRUB to EFI partition
+  arch-chroot /mnt grub-install \
+    --target=x86_64-efi \
+    --efi-directory="$BOOT_MOUNT" \
+    --bootloader-id=GRUB \
+    --recheck
 
   if [ $? -ne 0 ]; then
     print_error "Failed to install GRUB"
     return 1
   fi
 
-  print_success "GRUB installed"
+  print_success "GRUB installed to EFI"
 
-  # Configure GRUB
-  configure_grub
+  # Generate GRUB config
+  print_info "Generating GRUB configuration..."
+  arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+
+  print_success "GRUB configured"
 
   return 0
 }
@@ -249,87 +212,103 @@ install_grub_uefi() {
 install_grub_bios() {
   print_info "Installing GRUB for BIOS..."
 
-  # Get disk device (not partition)
-  local disk_device=$(lsblk -no pkname "$ROOT_PART" | head -1)
-  disk_device="/dev/$disk_device"
-
-  print_info "Installing GRUB to: $disk_device"
-
-  # Install GRUB packages
+  # Install GRUB package
   arch-chroot /mnt pacman -S --noconfirm --needed grub
 
-  # Install GRUB to disk
-  arch-chroot /mnt grub-install --target=i386-pc "$disk_device"
+  # Get disk (not partition) for BIOS install
+  DISK=$(lsblk -ndo PKNAME "$ROOT_PART" | head -1)
+
+  if [ -z "$DISK" ]; then
+    print_error "Could not detect disk for GRUB installation"
+    echo "Available disks:"
+    lsblk -ndo NAME,SIZE,TYPE | grep disk
+    read -p "Enter disk for GRUB (e.g., sda): " DISK
+  fi
+
+  print_info "Installing GRUB to /dev/$DISK"
+
+  arch-chroot /mnt grub-install --target=i386-pc --recheck /dev/"$DISK"
 
   if [ $? -ne 0 ]; then
     print_error "Failed to install GRUB"
     return 1
   fi
 
-  print_success "GRUB installed"
-
-  # Configure GRUB
-  configure_grub
-
-  return 0
-}
-
-configure_grub() {
-  print_info "Configuring GRUB..."
-
-  # Update GRUB configuration
-  if [ "$ENCRYPTED_ROOT" = "true" ]; then
-    # Add encryption support
-    arch-chroot /mnt sed -i "s|^GRUB_CMDLINE_LINUX=.*|GRUB_CMDLINE_LINUX=\"cryptdevice=UUID=$ROOT_UUID:cryptroot\"|" /etc/default/grub
-  fi
-
-  # Enable os-prober for dual boot detection
-  echo "GRUB_DISABLE_OS_PROBER=false" >>/mnt/etc/default/grub
-  arch-chroot /mnt pacman -S --noconfirm --needed os-prober
+  print_success "GRUB installed to /dev/$DISK"
 
   # Generate GRUB config
+  print_info "Generating GRUB configuration..."
   arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
 
-  if [ $? -eq 0 ]; then
-    print_success "GRUB configured"
-  else
-    print_error "Failed to generate GRUB config"
-    return 1
-  fi
+  print_success "GRUB configured"
 
   return 0
 }
 
-install_libreboot() {
-  print_info "Installing libreboot..."
+verify_bootloader() {
+  print_info "Verifying bootloader installation..."
 
-  print_warning "libreboot installation requires manual configuration"
-  print_warning "This installer will prepare the system, but you must:"
-  print_warning "  1. Flash libreboot to your device separately"
-  print_warning "  2. Configure payload manually"
+  if [ "$BOOTLOADER" = "systemd-boot" ]; then
+    # Check systemd-boot files
+    if [ -f /mnt"$BOOT_MOUNT"/loader/loader.conf ] &&
+      [ -f /mnt"$BOOT_MOUNT"/loader/entries/imaginary.conf ] &&
+      [ -f /mnt"$BOOT_MOUNT"/EFI/systemd/systemd-bootx64.efi ]; then
+      print_success "systemd-boot installation verified"
+      return 0
+    else
+      print_error "systemd-boot files incomplete!"
+      return 1
+    fi
+  else
+    # Check GRUB files
+    if [ "$BOOT_MODE" = "UEFI" ]; then
+      if [ -f /mnt"$BOOT_MOUNT"/EFI/GRUB/grubx64.efi ] &&
+        [ -f /mnt/boot/grub/grub.cfg ]; then
+        print_success "GRUB installation verified"
+        return 0
+      else
+        print_error "GRUB files incomplete!"
+        return 1
+      fi
+    else
+      if [ -f /mnt/boot/grub/grub.cfg ]; then
+        print_success "GRUB installation verified"
+        return 0
+      else
+        print_error "GRUB config missing!"
+        return 1
+      fi
+    fi
+  fi
+}
 
+configure_kernel_parameters() {
   echo ""
-  read -p "Continue with libreboot preparation? (y/N): " -n 1 -r
+  print_info "Additional kernel parameters (optional):"
+  echo "Examples:"
+  echo "  - quiet loglevel=3 (minimal boot messages)"
+  echo "  - apparmor=1 security=apparmor (enable AppArmor)"
+  echo "  - mitigations=off (disable CPU mitigations for performance)"
+  echo ""
+
+  read -p "Add custom kernel parameters? (y/N): " -n 1 -r
   echo
 
-  if [[ ! $REPLY =~ ^[Yy]$ ]]; then
-    print_info "Switching to GRUB instead..."
-    SELECTED_BOOTLOADER="grub"
-    install_grub_uefi
-    return $?
+  if [[ $REPLY =~ ^[Yy]$ ]]; then
+    read -p "Enter kernel parameters: " KERNEL_PARAMS
+
+    if [ "$BOOTLOADER" = "systemd-boot" ]; then
+      # Update systemd-boot entry
+      sed -i "s/options .*/options root=PARTUUID=$ROOT_PARTUUID rw $KERNEL_PARAMS/" \
+        /mnt"$BOOT_MOUNT"/loader/entries/imaginary.conf
+      print_success "Kernel parameters added to systemd-boot"
+    else
+      # Update GRUB config
+      echo "GRUB_CMDLINE_LINUX=\"$KERNEL_PARAMS\"" >>/mnt/etc/default/grub
+      arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+      print_success "Kernel parameters added to GRUB"
+    fi
   fi
-
-  # Install GRUB as fallback
-  print_info "Installing GRUB as fallback bootloader..."
-  arch-chroot /mnt pacman -S --noconfirm --needed grub efibootmgr
-
-  print_success "System prepared for libreboot"
-  print_info "Manual steps required:"
-  print_info "  1. Flash libreboot firmware to your device"
-  print_info "  2. Configure GRUB payload in libreboot"
-  print_info "  3. Update boot configuration"
-
-  return 0
 }
 
 display_summary() {
@@ -338,10 +317,11 @@ display_summary() {
   echo -e "${BLUE}    Bootloader Installation Summary${NC}"
   echo -e "${BLUE}═══════════════════════════════════════${NC}"
   echo -e "Boot Mode:    ${GREEN}$BOOT_MODE${NC}"
-  echo -e "Bootloader:   ${GREEN}$BOOTLOADER_NAME${NC}"
-  echo -e "Root Device:  ${GREEN}$ROOT_PART${NC}"
-  if [ "$BOOT_MODE" = "UEFI" ]; then
-    echo -e "EFI Partition: ${GREEN}$EFI_PART${NC}"
+  echo -e "Bootloader:   ${GREEN}$BOOTLOADER${NC}"
+  echo -e "Root:         $ROOT_PART"
+  echo -e "Root UUID:    $ROOT_UUID"
+  if [ -n "$BOOT_PART" ]; then
+    echo -e "Boot:         $BOOT_PART mounted at $BOOT_MOUNT"
   fi
   echo -e "${BLUE}═══════════════════════════════════════${NC}"
   echo ""
@@ -354,22 +334,17 @@ main() {
   echo "╚═══════════════════════════════════════════╝"
   echo -e "${NC}"
 
-  # Check if BOOT_MODE is set
-  if [ -z "$BOOT_MODE" ]; then
-    print_error "BOOT_MODE not set"
-    print_info "Please run 00-checks.sh first"
-    return 1
-  fi
-
-  # Find root device
-  find_root_device || return 1
+  # Detect partitions and boot mode
+  detect_root_partition
+  detect_boot_partition
 
   # Select bootloader
   select_bootloader
 
-  # Confirm selection
-  echo ""
-  read -p "Install $BOOTLOADER_NAME? (Y/n): " -n 1 -r
+  # Display summary
+  display_summary
+
+  read -p "Proceed with bootloader installation? (Y/n): " -n 1 -r
   echo
 
   if [[ $REPLY =~ ^[Nn]$ ]]; then
@@ -377,29 +352,25 @@ main() {
     return 1
   fi
 
-  # Install selected bootloader
-  case "$SELECTED_BOOTLOADER" in
-  systemd-boot)
-    install_systemd_boot || return 1
-    ;;
-  grub)
-    if [ "$BOOT_MODE" = "UEFI" ]; then
-      install_grub_uefi || return 1
-    else
-      install_grub_bios || return 1
-    fi
-    ;;
-  libreboot)
-    install_libreboot || return 1
-    ;;
-  *)
-    print_error "Unknown bootloader: $SELECTED_BOOTLOADER"
-    return 1
-    ;;
-  esac
+  # Install based on selection
+  if [ "$BOOTLOADER" = "systemd-boot" ]; then
+    install_systemd_boot
+  elif [ "$BOOT_MODE" = "UEFI" ]; then
+    install_grub_uefi
+  else
+    install_grub_bios
+  fi
 
-  # Display summary
-  display_summary
+  if [ $? -ne 0 ]; then
+    print_error "Bootloader installation failed"
+    return 1
+  fi
+
+  # Configure kernel parameters
+  configure_kernel_parameters
+
+  # Verify installation
+  verify_bootloader
 
   print_success "Bootloader installation complete!"
 
