@@ -399,7 +399,7 @@ install_custom() {
     
     # Remove duplicates and empty entries
     if [ "${#all_packages[@]}" -gt 0 ]; then
-        mapfile -t all_packages < <(printf "%s\n" "${all_packages[@]}" | grep -v '^
+        mapfile -t all_packages < <(printf "%s\n" "${all_packages[@]}" | grep -v '^'
 
 main() {
     echo -e "${BLUE}"
