@@ -337,6 +337,72 @@ EOF
   print_success "Installation log saved to /var/log/imaginary-install.log"
 }
 
+verify_installation() {
+  echo ""
+  echo -e "${YELLOW}═══════════════════════════════════════${NC}"
+  echo -e "${YELLOW}    Installation Verification${NC}"
+  echo -e "${YELLOW}═══════════════════════════════════════${NC}"
+
+  print_info "Checking critical components..."
+
+  # Check fstab
+  if [ -f /mnt/etc/fstab ] && [ -s /mnt/etc/fstab ]; then
+    print_success "fstab exists and is not empty"
+  else
+    print_error "fstab is missing or empty!"
+  fi
+
+  # Check user exists
+  if arch-chroot /mnt id "$USERNAME" &>/dev/null; then
+    print_success "User $USERNAME exists"
+  else
+    print_error "User $USERNAME not found!"
+  fi
+
+  # Check root password
+  local root_status=$(arch-chroot /mnt passwd --status root | awk '{print $2}')
+  if [ "$root_status" = "P" ]; then
+    print_success "Root password is set"
+  else
+    print_error "Root password not set properly!"
+  fi
+
+  # Check bootloader files
+  if [ "$BOOT_MODE" = "UEFI" ]; then
+    if [ -d /mnt/boot/EFI ] || [ -d /mnt/boot/loader ]; then
+      print_success "Bootloader files found"
+    else
+      print_error "Bootloader files not found!"
+    fi
+  else
+    if [ -d /mnt/boot/grub ]; then
+      print_success "GRUB files found"
+    else
+      print_error "GRUB files not found!"
+    fi
+  fi
+
+  # Check kernel and initramfs
+  if ls /mnt/boot/vmlinuz-* &>/dev/null && ls /mnt/boot/initramfs-* &>/dev/null; then
+    print_success "Kernel and initramfs present"
+  else
+    print_error "Kernel or initramfs missing!"
+  fi
+
+  # Check hostname
+  if [ -f /mnt/etc/hostname ]; then
+    print_success "Hostname configured: $(cat /mnt/etc/hostname)"
+  else
+    print_error "Hostname not configured!"
+  fi
+
+  echo -e "${YELLOW}═══════════════════════════════════════${NC}"
+  echo ""
+
+  print_info "Press Enter to continue or Ctrl+C to abort..."
+  read
+}
+
 display_summary() {
   echo ""
   echo -e "${BLUE}═══════════════════════════════════════${NC}"
@@ -378,7 +444,24 @@ main() {
   # Display summary
   display_summary
 
+  # Verify installation
+  verify_installation
+
   print_success "Final configuration complete!"
+
+  echo ""
+  echo -e "${GREEN}╔═══════════════════════════════════════════╗${NC}"
+  echo -e "${GREEN}║    Installation Complete!                ║${NC}"
+  echo -e "${GREEN}╚═══════════════════════════════════════════╝${NC}"
+  echo ""
+  print_info "You can now review any errors above."
+  print_info "Check /mnt/var/log/imaginary-install.log for details."
+  echo ""
+  print_info "When ready to reboot:"
+  print_info "  1. Exit the installer"
+  print_info "  2. Run: umount -R /mnt"
+  print_info "  3. Run: reboot"
+  echo ""
 
   return 0
 }
