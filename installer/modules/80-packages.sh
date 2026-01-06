@@ -22,83 +22,72 @@ print_error() {
 }
 
 # Package categories
-declare -A BROWSERS=(
-  ["firefox"]="Mozilla Firefox - Popular open source browser"
-  ["chromium"]="Chromium - Open source base of Chrome"
-  ["brave-bin"]="Brave Browser - Privacy-focused (AUR)"
-  ["librewolf-bin"]="LibreWolf - Privacy-hardened Firefox fork (AUR)"
-)
+declare -A BROWSERS
+BROWSERS["firefox"]="Mozilla Firefox - Popular open source browser"
+BROWSERS["chromium"]="Chromium - Open source base of Chrome"
+BROWSERS["brave-bin"]="Brave Browser - Privacy-focused (AUR)"
+BROWSERS["librewolf-bin"]="LibreWolf - Privacy-hardened Firefox fork (AUR)"
 
-declare -A TERMINALS=(
-  ["kitty"]="Kitty - GPU accelerated terminal (default)"
-  ["alacritty"]="Alacritty - Lightweight GPU terminal"
-  ["wezterm"]="WezTerm - GPU terminal with tmux-like features"
-  ["foot"]="Foot - Minimal Wayland terminal"
-)
+declare -A TERMINALS
+TERMINALS["kitty"]="Kitty - GPU accelerated terminal (default)"
+TERMINALS["alacritty"]="Alacritty - Lightweight GPU terminal"
+TERMINALS["wezterm"]="WezTerm - GPU terminal with tmux-like features"
+TERMINALS["foot"]="Foot - Minimal Wayland terminal"
 
-declare -A EDITORS=(
-  ["neovim"]="Neovim - Modern Vim fork"
-  ["vim"]="Vim - Classic text editor"
-  ["code"]="VS Code - Microsoft's editor (AUR: visual-studio-code-bin)"
-  ["vscodium-bin"]="VSCodium - VS Code without telemetry (AUR)"
-)
+declare -A EDITORS
+EDITORS["neovim"]="Neovim - Modern Vim fork"
+EDITORS["vim"]="Vim - Classic text editor"
+EDITORS["code"]="VS Code - Microsoft's editor (AUR: visual-studio-code-bin)"
+EDITORS["vscodium-bin"]="VSCodium - VS Code without telemetry (AUR)"
 
-declare -A FILE_MANAGERS=(
-  ["thunar"]="Thunar - XFCE file manager (lightweight)"
-  ["nautilus"]="Nautilus - GNOME file manager"
-  ["dolphin"]="Dolphin - KDE file manager"
-  ["ranger"]="Ranger - Terminal file manager"
-  ["nnn"]="nnn - Fast terminal file manager"
-)
+declare -A FILE_MANAGERS
+FILE_MANAGERS["thunar"]="Thunar - XFCE file manager (lightweight)"
+FILE_MANAGERS["nautilus"]="Nautilus - GNOME file manager"
+FILE_MANAGERS["dolphin"]="Dolphin - KDE file manager"
+FILE_MANAGERS["ranger"]="Ranger - Terminal file manager"
+FILE_MANAGERS["nnn"]="nnn - Fast terminal file manager"
 
-declare -A MEDIA_PLAYERS=(
-  ["vlc"]="VLC - Versatile media player"
-  ["mpv"]="MPV - Minimal media player"
-  ["celluloid"]="Celluloid - GTK frontend for MPV"
-)
+declare -A MEDIA_PLAYERS
+MEDIA_PLAYERS["vlc"]="VLC - Versatile media player"
+MEDIA_PLAYERS["mpv"]="MPV - Minimal media player"
+MEDIA_PLAYERS["celluloid"]="Celluloid - GTK frontend for MPV"
 
-declare -A GRAPHICS=(
-  ["gimp"]="GIMP - Image editor"
-  ["inkscape"]="Inkscape - Vector graphics"
-  ["krita"]="Krita - Digital painting"
-  ["blender"]="Blender - 3D creation suite"
-)
+declare -A GRAPHICS
+GRAPHICS["gimp"]="GIMP - Image editor"
+GRAPHICS["inkscape"]="Inkscape - Vector graphics"
+GRAPHICS["krita"]="Krita - Digital painting"
+GRAPHICS["blender"]="Blender - 3D creation suite"
 
-declare -A COMMUNICATION=(
-  ["discord"]="Discord - Chat and VoIP"
-  ["telegram-desktop"]="Telegram - Messaging app"
-  ["signal-desktop"]="Signal - Private messaging"
-  ["element-desktop"]="Element - Matrix client"
-)
+declare -A COMMUNICATION
+COMMUNICATION["discord"]="Discord - Chat and VoIP"
+COMMUNICATION["telegram-desktop"]="Telegram - Messaging app"
+COMMUNICATION["signal-desktop"]="Signal - Private messaging"
+COMMUNICATION["element-desktop"]="Element - Matrix client"
 
-declare -A DEVELOPMENT=(
-  ["git"]="Git - Version control"
-  ["github-cli"]="GitHub CLI - GitHub from terminal"
-  ["docker"]="Docker - Containerization"
-  ["base-devel"]="Base Development - Compilers and build tools"
-)
+declare -A DEVELOPMENT
+DEVELOPMENT["git"]="Git - Version control"
+DEVELOPMENT["github-cli"]="GitHub CLI - GitHub from terminal"
+DEVELOPMENT["docker"]="Docker - Containerization"
+DEVELOPMENT["base-devel"]="Base Development - Compilers and build tools"
 
-declare -A PRODUCTIVITY=(
-  ["libreoffice-fresh"]="LibreOffice - Office suite"
-  ["thunderbird"]="Thunderbird - Email client"
-  ["obsidian"]="Obsidian - Note taking (AUR)"
-  ["notion-app"]="Notion - Productivity workspace (AUR)"
-)
+declare -A PRODUCTIVITY
+PRODUCTIVITY["libreoffice-fresh"]="LibreOffice - Office suite"
+PRODUCTIVITY["thunderbird"]="Thunderbird - Email client"
+PRODUCTIVITY["obsidian"]="Obsidian - Note taking (AUR)"
+PRODUCTIVITY["notion-app"]="Notion - Productivity workspace (AUR)"
 
-declare -A GAMING=(
-  ["steam"]="Steam - Gaming platform"
-  ["lutris"]="Lutris - Game manager"
-  ["wine"]="Wine - Windows compatibility"
-  ["gamemode"]="GameMode - Performance optimization"
-)
+declare -A GAMING
+GAMING["steam"]="Steam - Gaming platform"
+GAMING["lutris"]="Lutris - Game manager"
+GAMING["wine"]="Wine - Windows compatibility"
+GAMING["gamemode"]="GameMode - Performance optimization"
 
-declare -A UTILITIES=(
-  ["htop"]="htop - System monitor"
-  ["btop"]="btop - Beautiful system monitor"
-  ["neofetch"]="neofetch - System info"
-  ["fastfetch"]="fastfetch - Fast system info"
-  ["tmux"]="tmux - Terminal multiplexer"
-)
+declare -A UTILITIES
+UTILITIES["htop"]="htop - System monitor"
+UTILITIES["btop"]="btop - Beautiful system monitor"
+UTILITIES["neofetch"]="neofetch - System info"
+UTILITIES["fastfetch"]="fastfetch - Fast system info"
+UTILITIES["tmux"]="tmux - Terminal multiplexer"
 
 select_from_category() {
   local category_name=$1
