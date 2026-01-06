@@ -1,9 +1,5 @@
 # Imaginary Linux
 
-**Version 1.0.0 (Shamshel)**
-
-A transformative Arch-based system with guardian philosophy built-in.
-
 ```
    ████▓▓▒▒      ▒▒▓▓████
   ████▓▓▓▒▒      ▒▒▓▓▓████
@@ -16,206 +12,258 @@ A transformative Arch-based system with guardian philosophy built-in.
        IMAGINARY LINUX
 ```
 
-## What is Imaginary Linux?
+**Version 1.0 (Shamshel)**  
+*A hardened, minimal Arch-based Linux distribution*
 
-Imaginary Linux is not an ISO. It is a transformation.
-
-This is an Arch-based system designed for **intermediate Linux users** who want:
-- Intentional, guided system installation
-- Security-conscious defaults
-- Freedom of choice without hand-holding
-- A system that respects your intelligence while offering care
-
-**Philosophy:** Power should be usable without being reckless.
-
-## Installation
-
-### Prerequisites
-
-- An Arch Linux ISO (any recent version)
-- Internet connection
-- Basic Linux knowledge
-- 20GB+ disk space
-
-### Installation Steps
-
-1. **Boot from Arch ISO**
-
-2. **Connect to the internet:**
-   ```bash
-   # For WiFi
-   iwctl
-   # Or
-   nmtui
-   ```
-
-3. **Clone the repository:**
-   ```bash
-   git clone https://github.com/schizopup/imaginary-linux.git
-   cd imaginary-linux
-   ```
-
-4. **Run the installer:**
-   ```bash
-   sudo ./install.sh
-   ```
-
-5. **Follow the guided installation**
-
-The installer will walk you through:
-- System checks and hardware detection
-- Disk partitioning and formatting
-- Base system installation
-- Kernel selection (linux, linux-lts, linux-zen, linux-hardened)
-- Bootloader configuration (GRUB/systemd-boot/libreboot)
-- User account creation
-- Desktop environment selection
-- Driver installation
-- Optional software installation
-- System finalization
-
-## Features
-
-### What Makes It Different?
-
-- **No ISO required** - Transform any Arch system
-- **CLI-based installer** - Intentional, not automated
-- **Multiple kernel options** - Choose what fits your needs
-- **Desktop flexibility** - GNOME, KDE, XFCE, Cinnamon, BSPWM, i3, Hyprland
-- **Custom branding** - Unique ASCII art and system identity
-- **Imaginary repository** - Updates for Imaginary-specific tools
-- **Guardian philosophy** - `imaginary-angel` tool (coming in future updates)
-
-### Desktop Environments
-
-**Full Desktop Environments:**
-- GNOME - Modern, feature-rich
-- KDE Plasma - Customizable and powerful
-- XFCE - Lightweight and classic
-- Cinnamon - Traditional desktop layout
-
-**Window Managers:**
-- BSPWM - Binary space partitioning (with optional custom rice)
-- i3 - Tiling window manager
-- Hyprland - Modern Wayland compositor
-
-### Kernel Options
-
-- **linux** - Default Arch kernel (recommended)
-- **linux-lts** - Long term support, maximum stability
-- **linux-zen** - Performance-optimized for desktop/gaming
-- **linux-hardened** - Security-focused (may have compatibility issues)
-
-## Post-Installation
-
-After rebooting, your system will:
-- Display the Imaginary Linux ASCII logo
-- Run `fastfetch` automatically on terminal launch
-- Have all selected software ready to use
-
-### Imaginary Repository
-
-The installer adds the Imaginary Linux repository for system-specific tools:
-
-```ini
-[imaginary]
-SigLevel = Optional TrustAll
-Server = https://github.com/schizopup/imaginary-repo/releases/download/$arch
-```
-
-This repository will contain:
-- `imaginary-angel` - System guardian tool (coming soon)
-- Future Imaginary-specific utilities
-
-## The Guardian (Coming Soon)
-
-**imaginary-angel** will be a post-install tool for:
-- System integrity checking
-- Security hardening
-- Network traffic monitoring
-- Configuration audit
-- Systemd hardening assistance
-
-The angel doesn't run unless you invoke it. It guides, it doesn't govern.
-
-## Version Naming
-
-Each version is named after an angel from Neon Genesis Evangelion:
-
-- **1.0.0 (Shamshel)** - Current release. Focus: Protection and structure.
-- Previous: 0.5.X (Sachiel) - Proof of concept
-
-Future angels will bring new philosophical focuses and features.
-
-## For Developers
-
-### Repository Structure
-
-```
-imaginary-linux/
-├── install.sh              # Main installer
-├── modules/                # Installation modules
-│   ├── 00-checks.sh
-│   ├── 10-disk.sh
-│   ├── 20-base.sh
-│   ├── 30-kernel.sh
-│   ├── 40-bootloader.sh
-│   ├── 50-users.sh
-│   ├── 60-desktop.sh
-│   ├── 70-drivers.sh
-│   ├── 80-packages.sh
-│   └── 90-finalize.sh
-├── profiles/               # Desktop environment profiles
-│   ├── gnome/
-│   ├── kde/
-│   ├── xfce/
-│   ├── cinnamon/
-│   ├── bspwm/
-│   ├── i3/
-│   └── hyprland/
-└── assets/                 # Branding assets
-    ├── logo.txt
-    └── logo-small.txt
-```
-
-### Contributing
-
-Contributions welcome! Please:
-1. Fork the repository
-2. Create a feature branch
-3. Test thoroughly in a VM
-4. Submit a pull request
-
-## Support
-
-- **Issues:** https://github.com/schizopup/imaginary-linux/issues
-- **Discussions:** https://github.com/schizopup/imaginary-linux/discussions
-
-## Philosophy
-
-Imaginary Linux is defined less by how it installs, and more by how it helps you live with the system afterward.
-
-This is a system that:
-- Assumes intelligence but still offers care
-- Provides power without encouraging recklessness
-- Protects through awareness, not restriction
-- Treats security as guided awareness, not lockdown
-
-**Imaginary Linux protects the user. The user protects the system.**
-
-## License
-
-The installer scripts and configurations are MIT licensed.
-The Arch Linux base system retains its original licenses.
-
-## Acknowledgments
-
-- **Arch Linux** - The substrate and foundation
-- **ArchTitus** - Inspiration for installer architecture
-- **Neon Genesis Evangelion** - Naming and philosophical inspiration
-- **The community** - For testing and feedback
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Arch Linux](https://img.shields.io/badge/Based%20on-Arch%20Linux-1793D1?logo=arch-linux)](https://archlinux.org/)
 
 ---
 
-**Imaginary Linux 1.0.0 (Shamshel)**  
-*Power should be usable without being reckless.*
+## 📖 About
+
+Imaginary Linux is a security-focused, user-friendly Arch-based distribution designed for intermediate Linux users who want a clean, customizable system without the complexity of manual Arch installation.
+
+### Why Imaginary?
+
+- 🛡️ **Security First** - Hardened kernel options, AppArmor support, firewall enabled by default
+- ⚡ **Fast & Lightweight** - Minimal bloat, optimized for performance
+- 🎨 **Customizable** - Choose from 7 desktop environments/window managers
+- 🔧 **Automated Installation** - Full CLI installer handles everything
+- 🎯 **Arch-Based** - Rolling release, access to AUR, pacman package manager
+
+### Screenshots
+
+<div align="center">
+
+**Installer**  
+![Installer](./assets/screenshots/installer.png)
+
+**Terminal**  
+![Terminal](./assets/screenshots/terminal.png)
+
+</div>
+
+---
+
+## ✨ Features
+
+### Installation
+- **Automated CLI installer** - No manual partitioning or configuration needed
+- **Multiple desktop environments** - GNOME, KDE, XFCE, Cinnamon, BSPWM, i3, Hyprland
+- **Custom BSPWM rice** - Pre-configured beautiful setup for BSPWM users
+- **Flexible partitioning** - Preserve existing home partition, encryption support (LUKS)
+- **Dual boot aware** - Detects other operating systems
+
+### Security
+- **Hardened kernel options** - Security-focused kernel parameters
+- **AppArmor support** - Mandatory Access Control framework
+- **UFW firewall** - Enabled and configured by default
+- **System hardening** - Optional security hardening during installation
+- **Minimal attack surface** - Only essential packages installed
+
+### Desktop Environments
+
+| Environment | Type | Description |
+|------------|------|-------------|
+| **GNOME** | Full DE | Modern, feature-rich desktop |
+| **KDE Plasma** | Full DE | Highly customizable, powerful |
+| **XFCE** | Full DE | Lightweight, classic experience |
+| **Cinnamon** | Full DE | Traditional desktop layout |
+| **BSPWM** | WM | Tiling window manager with custom rice |
+| **i3** | WM | Popular tiling window manager |
+| **Hyprland** | WM | Modern Wayland compositor |
+
+### Package Management
+- **pacman** - Fast, efficient package manager
+- **AUR support** - Choose between paru or yay
+- **Minimal base** - Install only what you need
+- **Optional packages** - Curated selection of common applications
+
+---
+
+## 🚀 Quick Start
+
+### Download
+
+Download the latest release from [GitHub Releases](https://github.com/yourusername/imaginary-linux/releases)
+
+### Installation
+
+1. **Boot from any Arch Linux ISO**
+2. **Connect to the internet:**
+   ```bash
+   systemctl start NetworkManager
+   nmtui
+   ```
+3. **Clone the repository:**
+   ```bash
+   git clone https://github.com/yourusername/imaginary-linux.git
+   cd imaginary-linux
+   ```
+4. **Run the installer:**
+   ```bash
+   sudo ./installer/install.sh
+   ```
+5. **Follow the prompts** - The installer will guide you through the process
+
+See [INSTALL.md](INSTALL.md) for detailed installation instructions.
+
+---
+
+## 📦 What's Included
+
+### Base System
+- Linux kernel (choice of standard, LTS, zen, or hardened)
+- Base-devel tools
+- NetworkManager
+- Git, vim, fastfetch
+- Auto-detected hardware drivers (GPU, audio, network)
+
+### Desktop Profiles
+
+**Minimal Installation:**
+- Desktop environment/window manager
+- Terminal emulator (kitty)
+- Web browser (Firefox)
+- Essential utilities
+
+**Full Installation:**
+- Everything in Minimal
+- File manager
+- Archive tools
+- System utilities
+- Multimedia support
+
+### Optional Packages
+Choose from curated categories:
+- Web browsers (Firefox, Chromium, Brave, LibreWolf)
+- Editors (Neovim, VS Code, VSCodium)
+- Communication (Discord, Telegram, Signal)
+- Development tools (Docker, Git, GitHub CLI)
+- Gaming (Steam, Lutris, Wine)
+- And more...
+
+---
+
+## 🎨 Customization
+
+### BSPWM Rice
+
+If you select BSPWM during installation, you can optionally install the **Imaginary BSPWM rice** - a pre-configured, beautiful setup featuring:
+
+- Custom keybindings
+- Polybar status bar
+- Picom compositor
+- Rofi launcher
+- Coordinated color scheme
+- And more!
+
+The rice repository: [bspwm-rice](https://github.com/schizopup/bspwm-rice)
+
+---
+
+## 🛠️ Advanced Features
+
+### System Hardening
+
+Optional security hardening includes:
+- Kernel parameter hardening (dmesg_restrict, kptr_restrict, ASLR)
+- Restricted ptrace access
+- Core dump disabling
+- Secure umask (077)
+- SSH hardening
+- Systemd security settings
+- AppArmor integration
+- Automatic security updates (optional)
+
+### Bootloader Options
+
+- **systemd-boot** (UEFI, recommended)
+- **GRUB** (UEFI and BIOS)
+
+### Partition Schemes
+
+- Preserve existing /home partition
+- Btrfs with snapshots
+- Swap (file, partition, or zram)
+
+---
+
+## 📚 Documentation
+
+- [Installation Guide](INSTALL.md) - Detailed installation instructions
+- [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and solutions
+- [Customization Guide](docs/CUSTOMIZATION.md) - Personalize your system
+- [Contributing](docs/CONTRIBUTING.md) - Help improve Imaginary Linux
+
+---
+
+## 🔄 Version History
+
+### Version 1.0 (Shamshel) - Current
+- Initial public release
+- Automated installer
+- 7 desktop environment options
+- Security hardening features
+- Custom BSPWM rice
+- UEFI and BIOS support
+
+Future versions will follow Evangelion angel naming:
+- **1.x (Shamshel)** - Current stable series
+- **2.x (Ramiel)** - Future major release
+- And so on...
+
+---
+
+## 🤝 Contributing
+
+Contributions are welcome! Whether it's:
+- Bug reports
+- Feature requests
+- Code improvements
+- Documentation
+- New desktop environment profiles
+
+Please see [CONTRIBUTING.md](docs/CONTRIBUTING.md) for guidelines.
+
+---
+
+## 📝 License
+
+Imaginary Linux is released under the MIT License. See [LICENSE](LICENSE) for details.
+
+The installer scripts and configurations are MIT licensed.  
+The Linux kernel and included packages retain their original licenses.
+
+---
+
+## 🙏 Credits
+
+- **Arch Linux** - The foundation of this distribution
+- **Chris Titus Tech** - Inspiration for the automated installer concept
+- Evangelion - Angel naming scheme
+- All the open source projects that make this possible
+
+---
+
+## 📞 Support
+
+- **Issues:** [GitHub Issues](https://github.com/yourusername/imaginary-linux/issues)
+- **Discussions:** [GitHub Discussions](https://github.com/yourusername/imaginary-linux/discussions)
+
+---
+
+## ⚠️ Disclaimer
+
+Imaginary Linux is provided as-is without warranty. This is a hobby project created for personal use and shared with the community. Always backup your data before installation.
+
+---
+
+<div align="center">
+
+**Imaginary Linux** - *Turning imagination into reality, one install at a time.*
+
+Made with ❤️ by the community
+
+</div>
