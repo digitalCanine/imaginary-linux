@@ -91,7 +91,8 @@ UTILITIES["tmux"]="tmux - Terminal multiplexer"
 
 select_from_category() {
   local category_name=$1
-  local -n category=$2
+  shift
+  local -a pkg_list=("$@")
   local selected_packages=()
 
   echo ""
@@ -99,21 +100,27 @@ select_from_category() {
   echo ""
 
   # Check if category has items
-  if [ ${#category[@]} -eq 0 ]; then
+  if [ ${#pkg_list[@]} -eq 0 ]; then
     print_warning "No packages in this category"
     return 0
   fi
 
   local index=1
+  local i=0
   local -a pkg_names=()
 
-  # Use array iteration instead
-  for pkg in "${!category[@]}"; do
-    printf "  %d) %s\n" "$index" "$pkg"
-    printf "     %s\n" "${category[$pkg]}"
+  # Iterate through pairs of (name, description)
+  while [ $i -lt ${#pkg_list[@]} ]; do
+    local pkg_name="${pkg_list[$i]}"
+    local pkg_desc="${pkg_list[$((i + 1))]}"
+
+    printf "  %d) %s\n" "$index" "$pkg_name"
+    printf "     %s\n" "$pkg_desc"
     echo ""
-    pkg_names+=("$pkg")
+
+    pkg_names+=("$pkg_name")
     ((index++))
+    ((i += 2))
   done
 
   echo "  0) Skip this category"
@@ -140,6 +147,18 @@ select_from_category() {
   if [ ${#selected_packages[@]} -gt 0 ]; then
     echo "${selected_packages[@]}"
   fi
+}
+
+# Helper function to convert associative array to flat list
+array_to_list() {
+  local -n arr=$1
+  local result=()
+
+  for key in "${!arr[@]}"; do
+    result+=("$key" "${arr[$key]}")
+  done
+
+  echo "${result[@]}"
 }
 
 install_packages() {
@@ -344,67 +363,67 @@ install_custom() {
 
   # Browser selection
   if [ ${#BROWSERS[@]} -gt 0 ]; then
-    local browser_pkgs=$(select_from_category "Web Browsers" BROWSERS)
+    local browser_pkgs=$(select_from_category "Web Browsers" $(array_to_list BROWSERS))
     all_packages+=($browser_pkgs)
   fi
 
   # Terminal selection
   if [ ${#TERMINALS[@]} -gt 0 ]; then
-    local terminal_pkgs=$(select_from_category "Terminal Emulators" TERMINALS)
+    local terminal_pkgs=$(select_from_category "Terminal Emulators" $(array_to_list TERMINALS))
     all_packages+=($terminal_pkgs)
   fi
 
   # Editor selection
   if [ ${#EDITORS[@]} -gt 0 ]; then
-    local editor_pkgs=$(select_from_category "Text Editors" EDITORS)
+    local editor_pkgs=$(select_from_category "Text Editors" $(array_to_list EDITORS))
     all_packages+=($editor_pkgs)
   fi
 
   # File manager selection
   if [ ${#FILE_MANAGERS[@]} -gt 0 ]; then
-    local fm_pkgs=$(select_from_category "File Managers" FILE_MANAGERS)
+    local fm_pkgs=$(select_from_category "File Managers" $(array_to_list FILE_MANAGERS))
     all_packages+=($fm_pkgs)
   fi
 
   # Media player selection
   if [ ${#MEDIA_PLAYERS[@]} -gt 0 ]; then
-    local media_pkgs=$(select_from_category "Media Players" MEDIA_PLAYERS)
+    local media_pkgs=$(select_from_category "Media Players" $(array_to_list MEDIA_PLAYERS))
     all_packages+=($media_pkgs)
   fi
 
   # Graphics selection
   if [ ${#GRAPHICS[@]} -gt 0 ]; then
-    local graphics_pkgs=$(select_from_category "Graphics Software" GRAPHICS)
+    local graphics_pkgs=$(select_from_category "Graphics Software" $(array_to_list GRAPHICS))
     all_packages+=($graphics_pkgs)
   fi
 
   # Communication selection
   if [ ${#COMMUNICATION[@]} -gt 0 ]; then
-    local comm_pkgs=$(select_from_category "Communication" COMMUNICATION)
+    local comm_pkgs=$(select_from_category "Communication" $(array_to_list COMMUNICATION))
     all_packages+=($comm_pkgs)
   fi
 
   # Development selection
   if [ ${#DEVELOPMENT[@]} -gt 0 ]; then
-    local dev_pkgs=$(select_from_category "Development Tools" DEVELOPMENT)
+    local dev_pkgs=$(select_from_category "Development Tools" $(array_to_list DEVELOPMENT))
     all_packages+=($dev_pkgs)
   fi
 
   # Productivity selection
   if [ ${#PRODUCTIVITY[@]} -gt 0 ]; then
-    local prod_pkgs=$(select_from_category "Productivity" PRODUCTIVITY)
+    local prod_pkgs=$(select_from_category "Productivity" $(array_to_list PRODUCTIVITY))
     all_packages+=($prod_pkgs)
   fi
 
   # Gaming selection
   if [ ${#GAMING[@]} -gt 0 ]; then
-    local gaming_pkgs=$(select_from_category "Gaming" GAMING)
+    local gaming_pkgs=$(select_from_category "Gaming" $(array_to_list GAMING))
     all_packages+=($gaming_pkgs)
   fi
 
   # Utilities selection
   if [ ${#UTILITIES[@]} -gt 0 ]; then
-    local util_pkgs=$(select_from_category "Utilities" UTILITIES)
+    local util_pkgs=$(select_from_category "Utilities" $(array_to_list UTILITIES))
     all_packages+=($util_pkgs)
   fi
 
