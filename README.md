@@ -21,7 +21,7 @@
 
 ---
 
-## 📖 About
+## About
 
 Imaginary Linux is an unconventional, git-based Arch distribution with a guardian philosophy. Unlike traditional distributions that release outdated ISOs, Imaginary Linux is always current, simply clone and install.
 
@@ -33,12 +33,12 @@ Imaginary Linux is an unconventional, git-based Arch distribution with a guardia
 
 ### Why Imaginary?
 
-- 🛡️ **Security First** - Hardened kernel options, AppArmor support, firewall enabled by default
-- ⚡ **Always Current** - Git-based delivery means you always get the latest installer
-- 🎨 **Customizable** - Choose from 7 desktop environments/window managers
-- 🔧 **Transparent** - Review all code before installation
-- 🎯 **Arch-Based** - Rolling release, access to AUR, pacman package manager
-- 👁️ **Guardian System** - Includes imaginary-angel for ongoing system monitoring and protection
+- **Security First** - Hardened kernel options, AppArmor support, firewall enabled by default
+- **Always Current** - Git-based delivery means you always get the latest installer
+- **Customizable** - Choose from 7 desktop environments/window managers
+- **Transparent** - Review all code before installation
+- **Arch-Based** - Rolling release, access to AUR, pacman package manager
+- **Guardian System** - Includes imaginary-angel for ongoing system monitoring and protection
 
 ### What Makes This a Distribution?
 
@@ -66,7 +66,7 @@ Imaginary Linux is an unconventional, git-based Arch distribution with a guardia
 
 ---
 
-## ✨ Features
+## Features
 
 ### Installation
 
@@ -106,7 +106,7 @@ Imaginary Linux is an unconventional, git-based Arch distribution with a guardia
 
 ---
 
-## 🚀 Quick Start
+## Quick Start
 
 ### Prerequisites
 
@@ -165,7 +165,7 @@ See [INSTALL.md](INSTALL.md) for detailed installation instructions.
 
 ---
 
-## 📦 What's Included
+## What's Included
 
 ### Base System
 
@@ -207,7 +207,7 @@ Choose from curated categories:
 
 ---
 
-## 🛡️ Guardian System: Imaginary Angel
+## Guardian System: Imaginary Angel
 
 Imaginary Linux includes **Imaginary Angel**, a comprehensive system guardian tool that provides:
 
@@ -235,7 +235,7 @@ The guardian philosophy means your system isn't just installed—it's protected 
 
 ---
 
-## 🛠️ Advanced Features
+## Advanced Features
 
 ### System Hardening
 
@@ -263,7 +263,7 @@ Optional security hardening includes:
 
 ---
 
-## 🔄 Version History & Roadmap
+## Version History & Roadmap
 
 ### Current: Version 1.1.16 (Shamshel)
 
@@ -296,7 +296,7 @@ Planned features for the next major release:
 
 ---
 
-## 🔄 Keeping Up to Date
+## Keeping Up to Date
 
 ### System Updates
 
@@ -326,22 +326,22 @@ No need to wait for ISO releases!
 
 ---
 
-## 🤝 Contributing
+## Contributing
 
 Contributions are welcome! Whether it's:
 
-- 🐛 Bug reports
-- 💡 Feature requests
-- 🔧 Code improvements
-- 📚 Documentation
-- 🎨 New desktop environment profiles
-- 🔒 Security enhancements
+- Bug reports
+- Feature requests
+- Code improvements
+- Documentation
+- New desktop environment profiles
+- Security enhancements
 
 See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
 
 ---
 
-## 📝 License
+## License
 
 Imaginary Linux is released under the MIT License. See [LICENSE](LICENSE) for details.
 
@@ -350,7 +350,7 @@ The Linux kernel and included packages retain their original licenses.
 
 ---
 
-## 🙏 Credits
+## Credits
 
 - **Arch Linux** - The foundation of this distribution
 - **Chris Titus Tech** - Inspiration for automated installer concepts
@@ -360,7 +360,7 @@ The Linux kernel and included packages retain their original licenses.
 
 ---
 
-## 📞 Support & Community
+## Support & Community
 
 - **Issues:** [GitHub Issues](https://github.com/digitalcanine/imaginary-linux/issues)
 - **Discussions:** [GitHub Discussions](https://github.com/digitalcanine/imaginary-linux/discussions)
@@ -368,7 +368,7 @@ The Linux kernel and included packages retain their original licenses.
 
 ---
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 Imaginary Linux is provided as-is without warranty. This is a community project created for enthusiasts who appreciate:
 
@@ -381,7 +381,7 @@ Imaginary Linux is provided as-is without warranty. This is a community project 
 
 ---
 
-## 🌟 Why Choose Imaginary?
+## Why Choose Imaginary?
 
 **Choose Imaginary Linux if you:**
 
