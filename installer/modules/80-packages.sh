@@ -21,107 +21,115 @@ print_error() {
   echo -e "${RED}[✗]${NC} $1"
 }
 
-# Package categories
-declare -A BROWSERS
-BROWSERS["firefox"]="Mozilla Firefox - Popular open source browser"
-BROWSERS["chromium"]="Chromium - Open source base of Chrome"
-BROWSERS["brave-bin"]="Brave Browser - Privacy-focused (AUR)"
-BROWSERS["librewolf-bin"]="LibreWolf - Privacy-hardened Firefox fork (AUR)"
+print_warning() {
+  echo -e "${YELLOW}[WARNING]${NC} $1"
+}
 
-declare -A TERMINALS
-TERMINALS["kitty"]="Kitty - GPU accelerated terminal (default)"
-TERMINALS["alacritty"]="Alacritty - Lightweight GPU terminal"
-TERMINALS["wezterm"]="WezTerm - GPU terminal with tmux-like features"
-TERMINALS["foot"]="Foot - Minimal Wayland terminal"
+# Package data as simple arrays (name|description pairs)
+get_browsers() {
+  echo "firefox|Mozilla Firefox - Popular open source browser"
+  echo "chromium|Chromium - Open source base of Chrome"
+  echo "brave-bin|Brave Browser - Privacy-focused (AUR)"
+  echo "librewolf-bin|LibreWolf - Privacy-hardened Firefox fork (AUR)"
+}
 
-declare -A EDITORS
-EDITORS["neovim"]="Neovim - Modern Vim fork"
-EDITORS["vim"]="Vim - Classic text editor"
-EDITORS["code"]="VS Code - Microsoft's editor (AUR: visual-studio-code-bin)"
-EDITORS["vscodium-bin"]="VSCodium - VS Code without telemetry (AUR)"
+get_terminals() {
+  echo "kitty|Kitty - GPU accelerated terminal"
+  echo "alacritty|Alacritty - Lightweight GPU terminal"
+  echo "wezterm|WezTerm - GPU terminal with tmux-like features"
+  echo "foot|Foot - Minimal Wayland terminal"
+}
 
-declare -A FILE_MANAGERS
-FILE_MANAGERS["thunar"]="Thunar - XFCE file manager (lightweight)"
-FILE_MANAGERS["nautilus"]="Nautilus - GNOME file manager"
-FILE_MANAGERS["dolphin"]="Dolphin - KDE file manager"
-FILE_MANAGERS["ranger"]="Ranger - Terminal file manager"
-FILE_MANAGERS["nnn"]="nnn - Fast terminal file manager"
+get_editors() {
+  echo "neovim|Neovim - Modern Vim fork"
+  echo "vim|Vim - Classic text editor"
+  echo "code|VS Code - Microsoft's editor (AUR)"
+  echo "vscodium-bin|VSCodium - VS Code without telemetry (AUR)"
+}
 
-declare -A MEDIA_PLAYERS
-MEDIA_PLAYERS["vlc"]="VLC - Versatile media player"
-MEDIA_PLAYERS["mpv"]="MPV - Minimal media player"
-MEDIA_PLAYERS["celluloid"]="Celluloid - GTK frontend for MPV"
+get_file_managers() {
+  echo "thunar|Thunar - XFCE file manager (lightweight)"
+  echo "nautilus|Nautilus - GNOME file manager"
+  echo "dolphin|Dolphin - KDE file manager"
+  echo "ranger|Ranger - Terminal file manager"
+  echo "nnn|nnn - Fast terminal file manager"
+}
 
-declare -A GRAPHICS
-GRAPHICS["gimp"]="GIMP - Image editor"
-GRAPHICS["inkscape"]="Inkscape - Vector graphics"
-GRAPHICS["krita"]="Krita - Digital painting"
-GRAPHICS["blender"]="Blender - 3D creation suite"
+get_media_players() {
+  echo "vlc|VLC - Versatile media player"
+  echo "mpv|MPV - Minimal media player"
+  echo "celluloid|Celluloid - GTK frontend for MPV"
+}
 
-declare -A COMMUNICATION
-COMMUNICATION["discord"]="Discord - Chat and VoIP"
-COMMUNICATION["telegram-desktop"]="Telegram - Messaging app"
-COMMUNICATION["signal-desktop"]="Signal - Private messaging"
-COMMUNICATION["element-desktop"]="Element - Matrix client"
+get_graphics() {
+  echo "gimp|GIMP - Image editor"
+  echo "inkscape|Inkscape - Vector graphics"
+  echo "krita|Krita - Digital painting"
+  echo "blender|Blender - 3D creation suite"
+}
 
-declare -A DEVELOPMENT
-DEVELOPMENT["git"]="Git - Version control"
-DEVELOPMENT["github-cli"]="GitHub CLI - GitHub from terminal"
-DEVELOPMENT["docker"]="Docker - Containerization"
-DEVELOPMENT["base-devel"]="Base Development - Compilers and build tools"
+get_communication() {
+  echo "discord|Discord - Chat and VoIP"
+  echo "telegram-desktop|Telegram - Messaging app"
+  echo "signal-desktop|Signal - Private messaging"
+  echo "element-desktop|Element - Matrix client"
+}
 
-declare -A PRODUCTIVITY
-PRODUCTIVITY["libreoffice-fresh"]="LibreOffice - Office suite"
-PRODUCTIVITY["thunderbird"]="Thunderbird - Email client"
-PRODUCTIVITY["obsidian"]="Obsidian - Note taking (AUR)"
-PRODUCTIVITY["notion-app"]="Notion - Productivity workspace (AUR)"
+get_development() {
+  echo "git|Git - Version control"
+  echo "github-cli|GitHub CLI - GitHub from terminal"
+  echo "docker|Docker - Containerization"
+  echo "base-devel|Base Development - Compilers and build tools"
+}
 
-declare -A GAMING
-GAMING["steam"]="Steam - Gaming platform"
-GAMING["lutris"]="Lutris - Game manager"
-GAMING["wine"]="Wine - Windows compatibility"
-GAMING["gamemode"]="GameMode - Performance optimization"
+get_productivity() {
+  echo "libreoffice-fresh|LibreOffice - Office suite"
+  echo "thunderbird|Thunderbird - Email client"
+  echo "obsidian|Obsidian - Note taking (AUR)"
+  echo "notion-app|Notion - Productivity workspace (AUR)"
+}
 
-declare -A UTILITIES
-UTILITIES["htop"]="htop - System monitor"
-UTILITIES["btop"]="btop - Beautiful system monitor"
-UTILITIES["neofetch"]="neofetch - System info"
-UTILITIES["fastfetch"]="fastfetch - Fast system info"
-UTILITIES["tmux"]="tmux - Terminal multiplexer"
+get_gaming() {
+  echo "steam|Steam - Gaming platform"
+  echo "lutris|Lutris - Game manager"
+  echo "wine|Wine - Windows compatibility"
+  echo "gamemode|GameMode - Performance optimization"
+}
+
+get_utilities() {
+  echo "htop|htop - System monitor"
+  echo "btop|btop - Beautiful system monitor"
+  echo "neofetch|neofetch - System info"
+  echo "fastfetch|fastfetch - Fast system info"
+  echo "tmux|tmux - Terminal multiplexer"
+}
 
 select_from_category() {
   local category_name=$1
-  shift
-  local -a pkg_list=("$@")
-  local selected_packages=()
+  local get_function=$2
 
   echo ""
-  echo -e "${BLUE}═══ $category_name ═══${NC}"
+  echo -e "${BLUE}━━━ $category_name ━━━${NC}"
   echo ""
 
-  # Check if category has items
-  if [ ${#pkg_list[@]} -eq 0 ]; then
+  local -a pkg_names=()
+  local -a pkg_descs=()
+  local index=1
+
+  # Read packages from function
+  while IFS='|' read -r name desc; do
+    pkg_names+=("$name")
+    pkg_descs+=("$desc")
+    printf "  %d) %s\n" "$index" "$name"
+    printf "     %s\n" "$desc"
+    echo ""
+    ((index++))
+  done < <($get_function)
+
+  if [ ${#pkg_names[@]} -eq 0 ]; then
     print_warning "No packages in this category"
     return 0
   fi
-
-  local index=1
-  local i=0
-  local -a pkg_names=()
-
-  # Iterate through pairs of (name, description)
-  while [ $i -lt ${#pkg_list[@]} ]; do
-    local pkg_name="${pkg_list[$i]}"
-    local pkg_desc="${pkg_list[$((i + 1))]}"
-
-    printf "  %d) %s\n" "$index" "$pkg_name"
-    printf "     %s\n" "$pkg_desc"
-    echo ""
-
-    pkg_names+=("$pkg_name")
-    ((index++))
-    ((i += 2))
-  done
 
   echo "  0) Skip this category"
   echo "  a) Install all from this category"
@@ -133,6 +141,8 @@ select_from_category() {
   if [ -z "$selection" ] || [ "$selection" = "0" ]; then
     return 0
   fi
+
+  local selected_packages=()
 
   if [ "$selection" = "a" ] || [ "$selection" = "A" ]; then
     selected_packages=("${pkg_names[@]}")
@@ -147,18 +157,6 @@ select_from_category() {
   if [ ${#selected_packages[@]} -gt 0 ]; then
     echo "${selected_packages[@]}"
   fi
-}
-
-# Helper function to convert associative array to flat list
-array_to_list() {
-  local -n arr=$1
-  local result=()
-
-  for key in "${!arr[@]}"; do
-    result+=("$key" "${arr[$key]}")
-  done
-
-  echo "${result[@]}"
 }
 
 install_packages() {
@@ -330,26 +328,6 @@ install_full() {
 install_custom() {
   print_info "Custom package selection..."
 
-  # Debug: Check if arrays are populated
-  print_info "Checking package categories..."
-  echo "  Browsers: ${#BROWSERS[@]} items"
-  echo "  Terminals: ${#TERMINALS[@]} items"
-  echo "  Editors: ${#EDITORS[@]} items"
-  echo "  File Managers: ${#FILE_MANAGERS[@]} items"
-  echo "  Media Players: ${#MEDIA_PLAYERS[@]} items"
-  echo "  Graphics: ${#GRAPHICS[@]} items"
-  echo "  Communication: ${#COMMUNICATION[@]} items"
-  echo "  Development: ${#DEVELOPMENT[@]} items"
-  echo "  Productivity: ${#PRODUCTIVITY[@]} items"
-  echo "  Gaming: ${#GAMING[@]} items"
-  echo "  Utilities: ${#UTILITIES[@]} items"
-  echo ""
-
-  if [ ${#BROWSERS[@]} -eq 0 ]; then
-    print_error "Package arrays are empty! This is a bug."
-    return 1
-  fi
-
   local all_packages=()
 
   # Show instructions
@@ -362,70 +340,48 @@ install_custom() {
   read -p "Press Enter to continue..." dummy
 
   # Browser selection
-  if [ ${#BROWSERS[@]} -gt 0 ]; then
-    local browser_pkgs=$(select_from_category "Web Browsers" $(array_to_list BROWSERS))
-    all_packages+=($browser_pkgs)
-  fi
+  local browser_pkgs=$(select_from_category "Web Browsers" get_browsers)
+  all_packages+=($browser_pkgs)
 
   # Terminal selection
-  if [ ${#TERMINALS[@]} -gt 0 ]; then
-    local terminal_pkgs=$(select_from_category "Terminal Emulators" $(array_to_list TERMINALS))
-    all_packages+=($terminal_pkgs)
-  fi
+  local terminal_pkgs=$(select_from_category "Terminal Emulators" get_terminals)
+  all_packages+=($terminal_pkgs)
 
   # Editor selection
-  if [ ${#EDITORS[@]} -gt 0 ]; then
-    local editor_pkgs=$(select_from_category "Text Editors" $(array_to_list EDITORS))
-    all_packages+=($editor_pkgs)
-  fi
+  local editor_pkgs=$(select_from_category "Text Editors" get_editors)
+  all_packages+=($editor_pkgs)
 
   # File manager selection
-  if [ ${#FILE_MANAGERS[@]} -gt 0 ]; then
-    local fm_pkgs=$(select_from_category "File Managers" $(array_to_list FILE_MANAGERS))
-    all_packages+=($fm_pkgs)
-  fi
+  local fm_pkgs=$(select_from_category "File Managers" get_file_managers)
+  all_packages+=($fm_pkgs)
 
   # Media player selection
-  if [ ${#MEDIA_PLAYERS[@]} -gt 0 ]; then
-    local media_pkgs=$(select_from_category "Media Players" $(array_to_list MEDIA_PLAYERS))
-    all_packages+=($media_pkgs)
-  fi
+  local media_pkgs=$(select_from_category "Media Players" get_media_players)
+  all_packages+=($media_pkgs)
 
   # Graphics selection
-  if [ ${#GRAPHICS[@]} -gt 0 ]; then
-    local graphics_pkgs=$(select_from_category "Graphics Software" $(array_to_list GRAPHICS))
-    all_packages+=($graphics_pkgs)
-  fi
+  local graphics_pkgs=$(select_from_category "Graphics Software" get_graphics)
+  all_packages+=($graphics_pkgs)
 
   # Communication selection
-  if [ ${#COMMUNICATION[@]} -gt 0 ]; then
-    local comm_pkgs=$(select_from_category "Communication" $(array_to_list COMMUNICATION))
-    all_packages+=($comm_pkgs)
-  fi
+  local comm_pkgs=$(select_from_category "Communication" get_communication)
+  all_packages+=($comm_pkgs)
 
   # Development selection
-  if [ ${#DEVELOPMENT[@]} -gt 0 ]; then
-    local dev_pkgs=$(select_from_category "Development Tools" $(array_to_list DEVELOPMENT))
-    all_packages+=($dev_pkgs)
-  fi
+  local dev_pkgs=$(select_from_category "Development Tools" get_development)
+  all_packages+=($dev_pkgs)
 
   # Productivity selection
-  if [ ${#PRODUCTIVITY[@]} -gt 0 ]; then
-    local prod_pkgs=$(select_from_category "Productivity" $(array_to_list PRODUCTIVITY))
-    all_packages+=($prod_pkgs)
-  fi
+  local prod_pkgs=$(select_from_category "Productivity" get_productivity)
+  all_packages+=($prod_pkgs)
 
   # Gaming selection
-  if [ ${#GAMING[@]} -gt 0 ]; then
-    local gaming_pkgs=$(select_from_category "Gaming" $(array_to_list GAMING))
-    all_packages+=($gaming_pkgs)
-  fi
+  local gaming_pkgs=$(select_from_category "Gaming" get_gaming)
+  all_packages+=($gaming_pkgs)
 
   # Utilities selection
-  if [ ${#UTILITIES[@]} -gt 0 ]; then
-    local util_pkgs=$(select_from_category "Utilities" $(array_to_list UTILITIES))
-    all_packages+=($util_pkgs)
-  fi
+  local util_pkgs=$(select_from_category "Utilities" get_utilities)
+  all_packages+=($util_pkgs)
 
   # Install all selected packages
   if [ ${#all_packages[@]} -gt 0 ]; then

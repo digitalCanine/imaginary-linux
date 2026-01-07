@@ -12,7 +12,7 @@
        IMAGINARY LINUX
 ```
 
-**Version 1.1.6 (Shamshel)**  
+**Version 1.1.12 (Shamshel)**  
 *A hardened, minimal Arch-based Linux distribution*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)

@@ -196,7 +196,7 @@ setup_imaginary_repo() {
 # Imaginary Linux Repository
 [imaginary]
 SigLevel = Optional TrustAll
-Server = https://github.com/digitalcanine/imaginary-repo/releases/download/packages
+EOServer = https://github.com/digitalcanine/imaginary-repo/releases/download/packagesF
 EOF
 
     print_success "Imaginary repository added"
@@ -218,7 +218,7 @@ EOF
 }
 
 install_imaginary_angel() {
-  print_info "Installing Imaginary Angel..."
+  print_info "Installing Imaginary packages..."
 
   echo ""
   print_info "Imaginary Angel is the system guardian for Imaginary Linux"
@@ -230,7 +230,7 @@ install_imaginary_angel() {
   print_info "  • System integrity verification"
   echo ""
 
-  read -p "Install Imaginary Angel? (Y/n): " -n 1 -r
+  read -p "Install Imaginary packages (angel + release)? (Y/n): " -n 1 -r
   echo
 
   if [[ ! $REPLY =~ ^[Nn]$ ]]; then
@@ -241,23 +241,26 @@ install_imaginary_angel() {
       setup_imaginary_repo
     fi
 
-    # Install package
-    print_info "Installing imaginary-angel package..."
+    # Install packages
+    print_info "Installing imaginary-release and imaginary-angel packages..."
 
-    if arch-chroot /mnt pacman -S --noconfirm imaginary-angel; then
-      print_success "Imaginary Angel installed successfully!"
+    if arch-chroot /mnt pacman -S --noconfirm imaginary-release imaginary-angel; then
+      print_success "Imaginary packages installed successfully!"
 
       echo ""
-      print_info "After rebooting, run 'imaginary-angel' to use the guardian system"
-      print_info "Configuration file: /etc/imaginary-angel.conf"
+      print_info "After rebooting:"
+      print_info "  • System branding updated to Imaginary Linux"
+      print_info "  • Run 'imaginary-angel' to use the guardian system"
+      print_info "  • Configuration: /etc/imaginary-angel.conf"
     else
-      print_error "Failed to install imaginary-angel"
-      print_warning "You can install it manually after rebooting:"
-      print_info "  sudo pacman -S imaginary-angel"
+      print_error "Failed to install imaginary packages"
+      print_warning "You can install them manually after rebooting:"
+      print_info "  sudo pacman -S imaginary-release imaginary-angel"
     fi
   else
-    print_info "Imaginary Angel not installed"
-    print_info "You can install it later with: sudo pacman -S imaginary-angel"
+    print_info "Imaginary packages not installed"
+    print_info "You can install them later with:"
+    print_info "  sudo pacman -S imaginary-release imaginary-angel"
   fi
 }
 
