@@ -345,6 +345,10 @@ paru -S aur-package-name
 - Install themes
 - Configure applications
 
+**Imaginary Updates**
+
+Updates to Imaginary can be viewed on the official README of the repository. If new packages are included, like the future custom kernel, you can simply update your pacman databases, and install the package. As for updating version number, simply run `sudo iamginary-release` after updating your system. If a newer version is available it will be changed automatically.
+
 ### Recommended First Steps
 
 1. **Create recovery user**
