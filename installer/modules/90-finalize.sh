@@ -180,8 +180,9 @@ setup_imaginary_repo() {
 
   echo ""
   print_info "The Imaginary repository provides:"
+  print_info "  • imaginary-release - OS branding and identification"
   print_info "  • imaginary-angel - System guardian and maintenance tool"
-  print_info "  • Future Imaginary-specific utilities and themes"
+  print_info "  • Future Imaginary-specific utilities"
   echo ""
 
   read -p "Enable Imaginary Linux repository? (Y/n): " -n 1 -r
@@ -217,8 +218,64 @@ EOF
   fi
 }
 
+install_imaginary_release() {
+  print_info "Installing Imaginary Linux branding..."
+
+  echo ""
+  print_info "The imaginary-release package provides:"
+  print_info "  • OS branding script (command: imaginary-release)"
+  print_info "  • Imaginary Linux identification files"
+  print_info "  • Custom ASCII logos"
+  print_info "  • Fastfetch configuration"
+  echo ""
+
+  read -p "Install imaginary-release package? (Y/n): " -n 1 -r
+  echo
+
+  if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+    # Check if repository is configured
+    if ! arch-chroot /mnt grep -q "\[imaginary\]" /etc/pacman.conf; then
+      print_warning "Imaginary repository not configured"
+      print_info "Configuring repository first..."
+      setup_imaginary_repo
+    fi
+
+    # Install imaginary-release package
+    print_info "Installing imaginary-release package..."
+
+    if arch-chroot /mnt pacman -S --noconfirm imaginary-release; then
+      print_success "imaginary-release package installed!"
+
+      # Now run the branding script
+      print_info "Applying Imaginary Linux branding..."
+
+      if arch-chroot /mnt imaginary-release; then
+        print_success "Imaginary Linux branding applied successfully!"
+
+        echo ""
+        print_info "Your system is now branded as Imaginary Linux!"
+        print_info "Run 'fastfetch' after reboot to see the custom logo"
+      else
+        print_error "Failed to apply branding"
+        print_warning "You can apply it manually after rebooting:"
+        print_info "  sudo imaginary-release"
+      fi
+    else
+      print_error "Failed to install imaginary-release package"
+      print_warning "You can install it manually after rebooting:"
+      print_info "  sudo pacman -S imaginary-release"
+      print_info "  sudo imaginary-release"
+    fi
+  else
+    print_info "imaginary-release not installed"
+    print_info "You can install it later with:"
+    print_info "  sudo pacman -S imaginary-release"
+    print_info "  sudo imaginary-release"
+  fi
+}
+
 install_imaginary_angel() {
-  print_info "Installing Imaginary packages..."
+  print_info "Installing Imaginary Angel..."
 
   echo ""
   print_info "Imaginary Angel is the system guardian for Imaginary Linux"
@@ -230,7 +287,7 @@ install_imaginary_angel() {
   print_info "  • System integrity verification"
   echo ""
 
-  read -p "Install Imaginary packages (angel + release)? (Y/n): " -n 1 -r
+  read -p "Install Imaginary Angel? (Y/n): " -n 1 -r
   echo
 
   if [[ ! $REPLY =~ ^[Nn]$ ]]; then
@@ -241,26 +298,25 @@ install_imaginary_angel() {
       setup_imaginary_repo
     fi
 
-    # Install packages
-    print_info "Installing imaginary-release and imaginary-angel packages..."
+    # Install imaginary-angel package
+    print_info "Installing imaginary-angel package..."
 
-    if arch-chroot /mnt pacman -S --noconfirm imaginary-release imaginary-angel; then
-      print_success "Imaginary packages installed successfully!"
+    if arch-chroot /mnt pacman -S --noconfirm imaginary-angel; then
+      print_success "Imaginary Angel installed successfully!"
 
       echo ""
       print_info "After rebooting:"
-      print_info "  • System branding updated to Imaginary Linux"
       print_info "  • Run 'imaginary-angel' to use the guardian system"
       print_info "  • Configuration: /etc/imaginary-angel.conf"
     else
-      print_error "Failed to install imaginary packages"
-      print_warning "You can install them manually after rebooting:"
-      print_info "  sudo pacman -S imaginary-release imaginary-angel"
+      print_error "Failed to install imaginary-angel"
+      print_warning "You can install it manually after rebooting:"
+      print_info "  sudo pacman -S imaginary-angel"
     fi
   else
-    print_info "Imaginary packages not installed"
-    print_info "You can install them later with:"
-    print_info "  sudo pacman -S imaginary-release imaginary-angel"
+    print_info "Imaginary Angel not installed"
+    print_info "You can install it later with:"
+    print_info "  sudo pacman -S imaginary-angel"
   fi
 }
 
@@ -591,9 +647,9 @@ EOF
 
 verify_installation() {
   echo ""
-  echo -e "${YELLOW}═════════════════════════════════════${NC}"
+  echo -e "${YELLOW}═══════════════════════════════════════${NC}"
   echo -e "${YELLOW}    Installation Verification${NC}"
-  echo -e "${YELLOW}═════════════════════════════════════${NC}"
+  echo -e "${YELLOW}═══════════════════════════════════════${NC}"
 
   print_info "Checking critical components..."
 
@@ -648,7 +704,7 @@ verify_installation() {
     print_error "Hostname not configured!"
   fi
 
-  echo -e "${YELLOW}═════════════════════════════════════${NC}"
+  echo -e "${YELLOW}═══════════════════════════════════════${NC}"
   echo ""
 
   print_info "Press Enter to continue or Ctrl+C to abort..."
@@ -657,9 +713,9 @@ verify_installation() {
 
 display_summary() {
   echo ""
-  echo -e "${BLUE}═════════════════════════════════════${NC}"
+  echo -e "${BLUE}═══════════════════════════════════════${NC}"
   echo -e "${BLUE}    Final Configuration Summary${NC}"
-  echo -e "${BLUE}═════════════════════════════════════${NC}"
+  echo -e "${BLUE}═══════════════════════════════════════${NC}"
   echo -e "Locale:       ${GREEN}en_US.UTF-8${NC}"
   echo -e "Timezone:     ${GREEN}Configured${NC}"
   echo -e "Pacman:       ${GREEN}Optimized${NC}"
@@ -667,7 +723,7 @@ display_summary() {
     echo -e "AUR Helper:   ${GREEN}$AUR_HELPER${NC}"
   fi
   echo -e "Services:     ${GREEN}Enabled${NC}"
-  echo -e "${BLUE}═════════════════════════════════════${NC}"
+  echo -e "${BLUE}═══════════════════════════════════════${NC}"
   echo ""
 }
 
@@ -685,6 +741,7 @@ main() {
   enable_multilib
   configure_pacman
   setup_imaginary_repo
+  install_imaginary_release
   install_imaginary_angel
   install_aur_helper
   configure_firewall
