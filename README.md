@@ -23,7 +23,7 @@
 
 ## 📖 About
 
-Imaginary Linux is an unconventional, git-based Arch distribution with a guardian philosophy. Unlike traditional distributions that release outdated ISOs, Imaginary Linux is always current—simply clone and install.
+Imaginary Linux is an unconventional, git-based Arch distribution with a guardian philosophy. Unlike traditional distributions that release outdated ISOs, Imaginary Linux is always current, simply clone and install.
 
 ### Why Git-Based?
 
@@ -123,14 +123,19 @@ Imaginary Linux is an unconventional, git-based Arch distribution with a guardia
 2. **Connect to the internet:**
 
    ```bash
-   # WiFi
-   systemctl start NetworkManager
-   nmtui
+   WiFi (using iwctl)
+   iwctl
+   # Inside iwctl:
+   # device list
+   # station wlan0 scan
+   # station wlan0 get-networks
+   # station wlan0 connect "SSID"
+   # exit
    
    # Ethernet usually auto-connects
    
-   # Verify
-   ping -c 3 archlinux.org
+   # Verify connection
+   ping -c 3 archlinux.org   
    ```
 
 3. **Clone and install:**
@@ -242,7 +247,6 @@ Optional security hardening includes:
 - Secure umask (077)
 - SSH hardening
 - Systemd security settings
-- AppArmor integration
 - Automatic security updates (optional)
 
 ### Bootloader Options
