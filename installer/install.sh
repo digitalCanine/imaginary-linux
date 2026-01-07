@@ -1,6 +1,6 @@
 #!/bin/bash
 # Imaginary Linux Installer
-# Version 1.1.12 (Shamshel)
+# Version 1.1.13 (Shamshel)
 # Main installer orchestrator
 
 set -e # Exit on error
@@ -58,7 +58,7 @@ show_banner() {
 ▒                          ▒
 
     IMAGINARY LINUX
-    Version 1.1.12 (Shamshel)
+    Version 1.1.13 (Shamshel)
     
     A transformative Arch-based system
     with guardian philosophy built-in
@@ -170,204 +170,6 @@ run_module() {
   fi
 }
 
-install_branding() {
-  print_step "Installing Imaginary Linux Branding"
-
-  print_info "Installing OS identification files..."
-
-  # Ensure directories exist
-  mkdir -p /mnt/usr/lib
-  mkdir -p /mnt/etc
-
-  # Canonical os-release (systemd reads THIS)
-  cat >/mnt/usr/lib/os-release <<'EOF'
-NAME="Imaginary Linux"
-PRETTY_NAME="Imaginary Linux"
-ID=imaginary
-ID_LIKE=arch
-BUILD_ID=rolling
-VERSION="1.1.12"
-VERSION_ID="1.1.12"
-VERSION_CODENAME=shamshel
-ANSI_COLOR="38;2;139;69;255"
-HOME_URL="https://github.com/digitalcanine/imaginary-linux"
-DOCUMENTATION_URL="https://github.com/digitalcanine/imaginary-linux"
-SUPPORT_URL="https://github.com/digitalcanine/imaginary-linux/issues"
-BUG_REPORT_URL="https://github.com/digitalcanine/imaginary-linux/issues"
-LOGO=imaginary
-EOF
-
-  # /etc/os-release should be a symlink
-  ln -sf ../usr/lib/os-release /mnt/etc/os-release
-
-  # Install lsb-release
-  cat >/mnt/etc/lsb-release <<'EOF'
-DISTRIB_ID=Imaginary
-DISTRIB_RELEASE=1.1.12
-DISTRIB_CODENAME=shamshel
-DISTRIB_DESCRIPTION="Imaginary Linux"
-EOF
-
-  # Install imaginary-release
-  cat >/mnt/etc/imaginary-release <<'EOF'
-IMAGINARY_VERSION="1.1.12"
-IMAGINARY_CODENAME="Shamshel"
-IMAGINARY_ANGEL="Shamshel"
-IMAGINARY_BUILD_DATE="2026-01-07"
-IMAGINARY_PHILOSOPHY="Protection through awareness"
-EOF
-
-  print_success "OS identification files installed"
-
-  # Install ASCII logos
-  print_info "Installing ASCII logos..."
-
-  mkdir -p /mnt/usr/share/imaginary
-
-  # Large logo
-  cat >/mnt/usr/share/imaginary/logo.txt <<'EOF'
-   ████▓▓▒▒      ▒▒▓▓████
-  ████▓▓▓▒▒      ▒▒▓▓▓████
- ████▓▓▓▓▒▒      ▒▒▓▓▓▓████
-████▓▓▓▓▒▒   ██   ▒▒▓▓▓▓████
-███▓▓▓▒▒     ██     ▒▒▓▓▓███
-██▓▓▒▒       ██       ▒▒▓▓██
-█▓▒          ██          ▒▓█
-▒                          ▒
-       IMAGINARY LINUX
-EOF
-
-  # Small logo
-  cat >/mnt/usr/share/imaginary/logo-small.txt <<'EOF'
-█▓▒  ▒▓█
-▓▒ IL ▒▓
-▒      ▒
-EOF
-
-  print_success "ASCII logos installed"
-
-  # Configure fastfetch
-  print_info "Configuring fastfetch..."
-
-  mkdir -p /mnt/etc/fastfetch
-
-  cat >/mnt/etc/fastfetch/config.jsonc <<'EOF'
-{
-  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
-  "logo": {
-    "type": "file",
-    "source": "/usr/share/imaginary/logo.txt",
-    "padding": {
-      "top": 1,
-      "right": 4
-    }
-  },
-  "separator": "  ",
-  "keyWidth": 12,
-  "modules": [
-    {
-      "type": "custom",
-      "format": "\u001b[1m\u001b[38;2;225;196;125m✧ IMAGINARY SYSTEM ✧\u001b[0m"
-    },
-    {
-      "type": "os",
-      "key": "\u001b[38;2;225;196;125mVersion\u001b[0m",
-      "format": "{version} · {codename}"
-    },
-    "break",
-    {
-      "type": "os",
-      "key": "\u001b[38;2;119;130;132mOS\u001b[0m",
-      "format": "{name}"
-    },
-    {
-      "type": "kernel",
-      "key": "\u001b[38;2;119;130;132mKernel\u001b[0m"
-    },
-    {
-      "type": "uptime",
-      "key": "\u001b[38;2;119;130;132mUptime\u001b[0m"
-    },
-    "break",
-    {
-      "type": "wm",
-      "key": "\u001b[38;2;90;93;97mWM\u001b[0m"
-    },
-    {
-      "type": "terminal",
-      "key": "\u001b[38;2;90;93;97mTerminal\u001b[0m"
-    },
-    {
-      "type": "shell",
-      "key": "\u001b[38;2;90;93;97mShell\u001b[0m"
-    },
-    "break",
-    {
-      "type": "cpu",
-      "key": "\u001b[38;2;175;185;121mCPU\u001b[0m"
-    },
-    {
-      "type": "memory",
-      "key": "\u001b[38;2;175;185;121mMemory\u001b[0m"
-    },
-    "break",
-    {
-      "type": "custom",
-      "format": "\u001b[38;2;119;130;132m⸻ the system stands, quietly ⸻\u001b[0m"
-    }
-  ]
-}
-EOF
-
-  print_success "Fastfetch configured"
-
-  # Create MOTD
-  print_info "Creating message of the day..."
-
-  cat >/mnt/etc/motd <<'EOF'
-
-   ████▓▓▒▒      ▒▒▓▓████
-  ████▓▓▓▒▒      ▒▒▓▓▓████
- ████▓▓▓▓▒▒      ▒▒▓▓▓▓████
-████▓▓▓▓▒▒   ██   ▒▒▓▓▓▓████
-███▓▓▓▒▒     ██     ▒▒▓▓▓███
-██▓▓▒▒       ██       ▒▒▓▓██
-█▓▒          ██          ▒▓█
-▒                          ▒
-
-       IMAGINARY LINUX
-    Version 1.1.12 (Shamshel)
-
-Welcome to Imaginary Linux - A transformative Arch-based system
-Documentation: https://github.com/digitalcanine/imaginary-linux
-
-EOF
-
-  print_success "MOTD created"
-
-  # Setup auto-run fastfetch
-  print_info "Setting up fastfetch auto-run..."
-
-  cat >/mnt/etc/profile.d/imaginary-fetch.sh <<'EOF'
-#!/bin/bash
-# Auto-run fastfetch on new interactive shells (once per session)
-
-if [[ $- == *i* ]] && [ -z "$IMAGINARY_FETCH_SHOWN" ]; then
-    export IMAGINARY_FETCH_SHOWN=1
-    
-    if command -v fastfetch &> /dev/null; then
-        fastfetch
-    fi
-fi
-EOF
-
-  chmod +x /mnt/etc/profile.d/imaginary-fetch.sh
-
-  print_success "Fastfetch auto-run configured"
-
-  print_success "Branding installation complete!"
-}
-
 show_completion() {
   clear
   echo -e "${GREEN}"
@@ -383,7 +185,7 @@ show_completion() {
 
     INSTALLATION COMPLETE!
     
-    Imaginary Linux 1.0.0 (Shamshel)
+    Imaginary Linux 1.1.12 (Shamshel)
     has been successfully installed.
 EOF
   echo -e "${NC}"
@@ -420,10 +222,7 @@ main() {
   run_module "70-drivers.sh" "Step 8/10: Hardware Drivers" || exit 1
   run_module "80-packages.sh" "Step 9/10: Optional Software" || exit 1
 
-  # Install branding
-  install_branding
-
-  # Finalize installation
+  # Finalize installation (includes imaginary-release package)
   run_module "90-finalize.sh" "Step 10/10: Final Configuration" || exit 1
 
   # Show completion message
