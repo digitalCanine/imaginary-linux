@@ -175,6 +175,92 @@ configure_pacman() {
   print_success "Pacman configured with parallel downloads and color"
 }
 
+setup_imaginary_repo() {
+  print_info "Setting up Imaginary Linux repository..."
+
+  echo ""
+  print_info "The Imaginary repository provides:"
+  print_info "  • imaginary-angel - System guardian and maintenance tool"
+  print_info "  • Future Imaginary-specific utilities and themes"
+  echo ""
+
+  read -p "Enable Imaginary Linux repository? (Y/n): " -n 1 -r
+  echo
+
+  if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+    print_info "Adding Imaginary repository to pacman.conf..."
+
+    # Add repository to pacman.conf
+    cat >>/mnt/etc/pacman.conf <<'EOF'
+
+# Imaginary Linux Repository
+[imaginary]
+SigLevel = Optional TrustAll
+Server = https://github.com/digitalcanine/imaginary-repo/releases/download/packages/$arch
+EOF
+
+    print_success "Imaginary repository added"
+
+    # Update package database
+    print_info "Updating package database..."
+    arch-chroot /mnt pacman -Sy
+
+    print_success "Repository configured successfully"
+  else
+    print_info "Imaginary repository not enabled"
+    print_info "You can enable it later by adding to /etc/pacman.conf:"
+    echo ""
+    echo "  [imaginary]"
+    echo "  SigLevel = Optional TrustAll"
+    echo "  Server = https://github.com/digitalcanine/imaginary-repo/releases/download/packages"
+    echo ""
+  fi
+}
+
+install_imaginary_angel() {
+  print_info "Installing Imaginary Angel..."
+
+  echo ""
+  print_info "Imaginary Angel is the system guardian for Imaginary Linux"
+  print_info "Features:"
+  print_info "  • System health monitoring and auto-repair"
+  print_info "  • Security auditing and hardening"
+  print_info "  • Network threat detection"
+  print_info "  • Process analysis and cleanup"
+  print_info "  • System integrity verification"
+  echo ""
+
+  read -p "Install Imaginary Angel? (Y/n): " -n 1 -r
+  echo
+
+  if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+    # Check if repository is configured
+    if ! arch-chroot /mnt grep -q "\[imaginary\]" /etc/pacman.conf; then
+      print_warning "Imaginary repository not configured"
+      print_info "Configuring repository first..."
+      setup_imaginary_repo
+    fi
+
+    # Install package
+    print_info "Installing imaginary-angel package..."
+
+    if arch-chroot /mnt pacman -S --noconfirm imaginary-angel; then
+      print_success "Imaginary Angel installed successfully!"
+
+      echo ""
+      print_info "After rebooting, run 'imaginary-angel' to use the guardian system"
+      print_info "Configuration file: /etc/imaginary-angel.conf"
+    else
+      print_error "Failed to install imaginary-angel"
+      print_warning "You can install it manually after rebooting:"
+      print_info "  sudo pacman -S imaginary-angel"
+    fi
+  else
+    print_info "Imaginary Angel not installed"
+    print_info "You can install it later with: sudo pacman -S imaginary-angel"
+  fi
+}
+
 install_aur_helper() {
   if [ -z "$AUR_HELPER" ]; then
     print_warning "No AUR helper selected, skipping"
@@ -502,9 +588,9 @@ EOF
 
 verify_installation() {
   echo ""
-  echo -e "${YELLOW}═══════════════════════════════════════${NC}"
+  echo -e "${YELLOW}═════════════════════════════════════${NC}"
   echo -e "${YELLOW}    Installation Verification${NC}"
-  echo -e "${YELLOW}═══════════════════════════════════════${NC}"
+  echo -e "${YELLOW}═════════════════════════════════════${NC}"
 
   print_info "Checking critical components..."
 
@@ -559,7 +645,7 @@ verify_installation() {
     print_error "Hostname not configured!"
   fi
 
-  echo -e "${YELLOW}═══════════════════════════════════════${NC}"
+  echo -e "${YELLOW}═════════════════════════════════════${NC}"
   echo ""
 
   print_info "Press Enter to continue or Ctrl+C to abort..."
@@ -568,9 +654,9 @@ verify_installation() {
 
 display_summary() {
   echo ""
-  echo -e "${BLUE}═══════════════════════════════════════${NC}"
+  echo -e "${BLUE}═════════════════════════════════════${NC}"
   echo -e "${BLUE}    Final Configuration Summary${NC}"
-  echo -e "${BLUE}═══════════════════════════════════════${NC}"
+  echo -e "${BLUE}═════════════════════════════════════${NC}"
   echo -e "Locale:       ${GREEN}en_US.UTF-8${NC}"
   echo -e "Timezone:     ${GREEN}Configured${NC}"
   echo -e "Pacman:       ${GREEN}Optimized${NC}"
@@ -578,7 +664,7 @@ display_summary() {
     echo -e "AUR Helper:   ${GREEN}$AUR_HELPER${NC}"
   fi
   echo -e "Services:     ${GREEN}Enabled${NC}"
-  echo -e "${BLUE}═══════════════════════════════════════${NC}"
+  echo -e "${BLUE}═════════════════════════════════════${NC}"
   echo ""
 }
 
@@ -595,6 +681,8 @@ main() {
   configure_vconsole
   enable_multilib
   configure_pacman
+  setup_imaginary_repo
+  install_imaginary_angel
   install_aur_helper
   configure_firewall
   harden_system

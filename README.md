@@ -159,6 +159,21 @@ Choose from curated categories:
 
 ---
 
+## Key Features
+
+### 🛡️ Guardian System: Imaginary Angel
+
+Imaginary Linux includes **Imaginary Angel**, a comprehensive system guardian tool that provides:
+
+- **System Health Monitoring**: Real-time CPU, memory, and disk monitoring with auto-repair capabilities
+- **Security Auditing**: SSH hardening, firewall management, privilege checks, and vulnerability scanning
+- **Network Protection**: Threat detection, DDoS prevention, port scan detection, and connection monitoring
+- **Process Management**: Suspicious process detection, zombie cleanup, and resource analysis
+- **System Integrity**: Package verification, file integrity checks, and configuration monitoring
+- **Smart Automation**: Configurable auto-fix mode for hands-free maintenance
+
+Run `imaginary-angel` after installation to access all guardian features.
+
 ## 🛠️ Advanced Features
 
 ### System Hardening
