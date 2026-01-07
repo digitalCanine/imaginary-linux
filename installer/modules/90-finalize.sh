@@ -374,6 +374,85 @@ configure_firewall() {
   fi
 }
 
+configure_apparmor() {
+  echo ""
+  print_info "AppArmor - Mandatory Access Control"
+  echo ""
+  print_info "AppArmor provides:"
+  print_info "  • Application confinement and sandboxing"
+  print_info "  • Protection against zero-day exploits"
+  print_info "  • Fine-grained access control"
+  print_info "  • Security profiles for system services"
+  echo ""
+
+  read -p "Install and enable AppArmor? (Y/n): " -n 1 -r
+  echo
+
+  if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+    print_info "Installing AppArmor..."
+    arch-chroot /mnt pacman -S --noconfirm apparmor
+
+    print_info "Enabling AppArmor service..."
+    arch-chroot /mnt systemctl enable apparmor.service
+
+    print_success "AppArmor installed and enabled"
+
+    echo ""
+    print_warning "Important: AppArmor requires kernel parameters"
+    print_info "The bootloader needs: apparmor=1 security=apparmor"
+    echo ""
+
+    read -p "Add AppArmor kernel parameters to bootloader? (Y/n): " -n 1 -r
+    echo
+
+    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+      # Detect bootloader and add parameters
+      if [ -f /mnt/boot/loader/entries/*.conf ]; then
+        # systemd-boot
+        print_info "Detected systemd-boot, adding parameters..."
+
+        for entry in /mnt/boot/loader/entries/*.conf; do
+          if grep -q "^options" "$entry"; then
+            # Add to existing options line
+            sed -i 's/^options \(.*\)/options \1 apparmor=1 security=apparmor/' "$entry"
+          else
+            # Add new options line
+            echo "options apparmor=1 security=apparmor" >>"$entry"
+          fi
+        done
+
+        print_success "AppArmor parameters added to systemd-boot"
+
+      elif [ -f /mnt/boot/grub/grub.cfg ]; then
+        # GRUB
+        print_info "Detected GRUB, updating configuration..."
+
+        # Add to GRUB_CMDLINE_LINUX_DEFAULT
+        if grep -q "^GRUB_CMDLINE_LINUX_DEFAULT=" /mnt/etc/default/grub; then
+          sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT="\(.*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 apparmor=1 security=apparmor"/' /mnt/etc/default/grub
+        else
+          echo 'GRUB_CMDLINE_LINUX_DEFAULT="apparmor=1 security=apparmor"' >>/mnt/etc/default/grub
+        fi
+
+        # Regenerate GRUB config
+        arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
+
+        print_success "AppArmor parameters added to GRUB"
+      else
+        print_warning "Could not detect bootloader automatically"
+        print_info "Please add these kernel parameters manually:"
+        print_info "  apparmor=1 security=apparmor"
+      fi
+    else
+      print_warning "AppArmor installed but not configured in bootloader"
+      print_info "Add these kernel parameters to enable:"
+      print_info "  apparmor=1 security=apparmor"
+    fi
+  else
+    print_info "AppArmor not installed"
+  fi
+}
+
 harden_system() {
   echo ""
   echo -e "${BLUE}╔═══════════════════════════════════════════╗${NC}"
@@ -390,22 +469,6 @@ harden_system() {
 
   if [[ $REPLY =~ ^[Nn]$ ]]; then
     print_info "Skipping system hardening"
-
-    # Still ask about AppArmor separately
-    echo ""
-    if arch-chroot /mnt pacman -Q linux-hardened &>/dev/null || grep -q "apparmor" /proc/cmdline 2>/dev/null; then
-      read -p "Enable AppArmor (security framework)? (Y/n): " -n 1 -r
-      echo
-
-      if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-        print_info "Installing AppArmor..."
-        arch-chroot /mnt pacman -S --noconfirm apparmor
-        arch-chroot /mnt systemctl enable apparmor.service
-        print_success "AppArmor enabled"
-        print_info "Note: Requires kernel parameter: apparmor=1 security=apparmor"
-      fi
-    fi
-
     return 0
   fi
 
@@ -745,6 +808,7 @@ main() {
   install_imaginary_angel
   install_aur_helper
   configure_firewall
+  configure_apparmor
   harden_system
   enable_systemd_services
   create_swap_file
