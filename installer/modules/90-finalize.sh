@@ -196,7 +196,7 @@ setup_imaginary_repo() {
 # Imaginary Linux Repository
 [imaginary]
 SigLevel = Optional TrustAll
-Server = https://github.com/digitalcanine/imaginary-repo/releases/download/packages/$arch
+Server = https://github.com/digitalcanine/imaginary-repo/releases/download/packages
 EOF
 
     print_success "Imaginary repository added"
