@@ -214,27 +214,6 @@ select_productivity() {
   done
 }
 
-select_gaming() {
-  echo ""
-  echo "=== Gaming ==="
-  echo "1) Steam"
-  echo "2) Lutris"
-  echo "3) Wine"
-  echo "4) GameMode"
-  echo "0) Skip"
-  echo ""
-  read -p "Select (space-separated): " choice
-
-  for num in $choice; do
-    case $num in
-    1) SELECTED_PACKAGES+=("steam") ;;
-    2) SELECTED_PACKAGES+=("lutris") ;;
-    3) SELECTED_PACKAGES+=("wine") ;;
-    4) SELECTED_PACKAGES+=("gamemode") ;;
-    esac
-  done
-}
-
 select_utilities() {
   echo ""
   echo "=== Utilities ==="
@@ -447,7 +426,6 @@ install_custom() {
   select_communication
   select_development
   select_productivity
-  select_gaming
   select_utilities
 
   # Install all selected packages
