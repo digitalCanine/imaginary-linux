@@ -161,7 +161,7 @@ For those who prefer a one-liner:
 curl -sL https://raw.githubusercontent.com/digitalcanine/imaginary-linux/main/quick-install.sh | sudo bash
 ```
 
-See [INSTALL.md](INSTALL.md) for detailed installation instructions.
+See [INSTALL.md](./docs/INSTALL.md) for detailed installation instructions.
 
 ---
 
