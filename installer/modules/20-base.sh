@@ -169,39 +169,6 @@ configure_pacman_chroot() {
   print_success "Pacman configured"
 }
 
-setup_imaginary_repo() {
-  print_info "Imaginary Linux repository (optional)"
-
-  echo ""
-  print_info "The Imaginary repository provides updates for:"
-  print_info "  - imaginary-angel (system guardian tool)"
-  print_info "  - Future Imaginary-specific utilities"
-  echo ""
-  print_warning "Repository is not yet available in v1.0.0"
-  print_info "This will be enabled in a future update"
-  echo ""
-
-  # Commented out for now - will be enabled when repo is live
-  # read -p "Add Imaginary Linux repository? (y/N): " -n 1 -r
-  # echo
-  #
-  # if [[ $REPLY =~ ^[Yy]$ ]]; then
-  #     cat >> /mnt/etc/pacman.conf << 'EOF'
-  #
-  # # Imaginary Linux Repository
-  # [imaginary]
-  # SigLevel = Optional TrustAll
-  # Server = https://github.com/schizopup/imaginary-repo/releases/download/$arch
-  # EOF
-  #
-  #     print_success "Imaginary Linux repository added"
-  # else
-  #     print_info "Imaginary repository not added"
-  # fi
-
-  print_info "Skipping Imaginary repository (not yet available)"
-}
-
 install_additional_tools() {
   print_info "Installing additional system tools..."
 
@@ -254,9 +221,6 @@ main() {
 
   # Configure pacman in chroot
   configure_pacman_chroot
-
-  # Setup Imaginary repo
-  setup_imaginary_repo
 
   # Install additional tools
   install_additional_tools
