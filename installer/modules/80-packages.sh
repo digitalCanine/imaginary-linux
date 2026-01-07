@@ -25,138 +25,237 @@ print_warning() {
   echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
-# Package data as simple arrays (name|description pairs)
-get_browsers() {
-  echo "firefox|Mozilla Firefox - Popular open source browser"
-  echo "chromium|Chromium - Open source base of Chrome"
-  echo "brave-bin|Brave Browser - Privacy-focused (AUR)"
-  echo "librewolf-bin|LibreWolf - Privacy-hardened Firefox fork (AUR)"
-}
-
-get_terminals() {
-  echo "kitty|Kitty - GPU accelerated terminal"
-  echo "alacritty|Alacritty - Lightweight GPU terminal"
-  echo "wezterm|WezTerm - GPU terminal with tmux-like features"
-  echo "foot|Foot - Minimal Wayland terminal"
-}
-
-get_editors() {
-  echo "neovim|Neovim - Modern Vim fork"
-  echo "vim|Vim - Classic text editor"
-  echo "code|VS Code - Microsoft's editor (AUR)"
-  echo "vscodium-bin|VSCodium - VS Code without telemetry (AUR)"
-}
-
-get_file_managers() {
-  echo "thunar|Thunar - XFCE file manager (lightweight)"
-  echo "nautilus|Nautilus - GNOME file manager"
-  echo "dolphin|Dolphin - KDE file manager"
-  echo "ranger|Ranger - Terminal file manager"
-  echo "nnn|nnn - Fast terminal file manager"
-}
-
-get_media_players() {
-  echo "vlc|VLC - Versatile media player"
-  echo "mpv|MPV - Minimal media player"
-  echo "celluloid|Celluloid - GTK frontend for MPV"
-}
-
-get_graphics() {
-  echo "gimp|GIMP - Image editor"
-  echo "inkscape|Inkscape - Vector graphics"
-  echo "krita|Krita - Digital painting"
-  echo "blender|Blender - 3D creation suite"
-}
-
-get_communication() {
-  echo "discord|Discord - Chat and VoIP"
-  echo "telegram-desktop|Telegram - Messaging app"
-  echo "signal-desktop|Signal - Private messaging"
-  echo "element-desktop|Element - Matrix client"
-}
-
-get_development() {
-  echo "git|Git - Version control"
-  echo "github-cli|GitHub CLI - GitHub from terminal"
-  echo "docker|Docker - Containerization"
-  echo "base-devel|Base Development - Compilers and build tools"
-}
-
-get_productivity() {
-  echo "libreoffice-fresh|LibreOffice - Office suite"
-  echo "thunderbird|Thunderbird - Email client"
-  echo "obsidian|Obsidian - Note taking (AUR)"
-  echo "notion-app|Notion - Productivity workspace (AUR)"
-}
-
-get_gaming() {
-  echo "steam|Steam - Gaming platform"
-  echo "lutris|Lutris - Game manager"
-  echo "wine|Wine - Windows compatibility"
-  echo "gamemode|GameMode - Performance optimization"
-}
-
-get_utilities() {
-  echo "htop|htop - System monitor"
-  echo "btop|btop - Beautiful system monitor"
-  echo "neofetch|neofetch - System info"
-  echo "fastfetch|fastfetch - Fast system info"
-  echo "tmux|tmux - Terminal multiplexer"
-}
-
-select_from_category() {
-  local category_name=$1
-  local get_function=$2
-
+select_browsers() {
   echo ""
-  echo -e "${BLUE}━━━ $category_name ━━━${NC}"
+  echo "=== Web Browsers ==="
+  echo "1) Firefox"
+  echo "2) Chromium"
+  echo "3) Brave (AUR)"
+  echo "4) LibreWolf (AUR)"
+  echo "0) Skip"
   echo ""
+  read -p "Select (space-separated): " choice
 
-  local -a pkg_names=()
-  local -a pkg_descs=()
-  local index=1
+  for num in $choice; do
+    case $num in
+    1) echo "firefox" ;;
+    2) echo "chromium" ;;
+    3) echo "brave-bin" ;;
+    4) echo "librewolf-bin" ;;
+    esac
+  done
+}
 
-  # Read packages from function
-  while IFS='|' read -r name desc; do
-    pkg_names+=("$name")
-    pkg_descs+=("$desc")
-    printf "  %d) %s\n" "$index" "$name"
-    printf "     %s\n" "$desc"
-    echo ""
-    ((index++))
-  done < <($get_function)
-
-  if [ ${#pkg_names[@]} -eq 0 ]; then
-    print_warning "No packages in this category"
-    return 0
-  fi
-
-  echo "  0) Skip this category"
-  echo "  a) Install all from this category"
+select_terminals() {
   echo ""
+  echo "=== Terminal Emulators ==="
+  echo "1) Kitty"
+  echo "2) Alacritty"
+  echo "3) WezTerm"
+  echo "4) Foot"
+  echo "0) Skip"
+  echo ""
+  read -p "Select (space-separated): " choice
 
-  read -p "Select packages (space-separated numbers, 'a' for all, or '0' to skip): " selection
+  for num in $choice; do
+    case $num in
+    1) echo "kitty" ;;
+    2) echo "alacritty" ;;
+    3) echo "wezterm" ;;
+    4) echo "foot" ;;
+    esac
+  done
+}
 
-  # Handle empty input
-  if [ -z "$selection" ] || [ "$selection" = "0" ]; then
-    return 0
-  fi
+select_editors() {
+  echo ""
+  echo "=== Text Editors ==="
+  echo "1) Neovim"
+  echo "2) Vim"
+  echo "3) VS Code (AUR)"
+  echo "4) VSCodium (AUR)"
+  echo "0) Skip"
+  echo ""
+  read -p "Select (space-separated): " choice
 
-  local selected_packages=()
+  for num in $choice; do
+    case $num in
+    1) echo "neovim" ;;
+    2) echo "vim" ;;
+    3) echo "visual-studio-code-bin" ;;
+    4) echo "vscodium-bin" ;;
+    esac
+  done
+}
 
-  if [ "$selection" = "a" ] || [ "$selection" = "A" ]; then
-    selected_packages=("${pkg_names[@]}")
-  else
-    for num in $selection; do
-      if [[ "$num" =~ ^[0-9]+$ ]] && [ "$num" -gt 0 ] && [ "$num" -le "${#pkg_names[@]}" ]; then
-        selected_packages+=("${pkg_names[$((num - 1))]}")
-      fi
-    done
-  fi
+select_file_managers() {
+  echo ""
+  echo "=== File Managers ==="
+  echo "1) Thunar (lightweight)"
+  echo "2) Nautilus (GNOME)"
+  echo "3) Dolphin (KDE)"
+  echo "4) Ranger (terminal)"
+  echo "5) nnn (terminal)"
+  echo "0) Skip"
+  echo ""
+  read -p "Select (space-separated): " choice
 
-  if [ ${#selected_packages[@]} -gt 0 ]; then
-    echo "${selected_packages[@]}"
-  fi
+  for num in $choice; do
+    case $num in
+    1) echo "thunar" ;;
+    2) echo "nautilus" ;;
+    3) echo "dolphin" ;;
+    4) echo "ranger" ;;
+    5) echo "nnn" ;;
+    esac
+  done
+}
+
+select_media() {
+  echo ""
+  echo "=== Media Players ==="
+  echo "1) VLC"
+  echo "2) MPV"
+  echo "3) Celluloid"
+  echo "0) Skip"
+  echo ""
+  read -p "Select (space-separated): " choice
+
+  for num in $choice; do
+    case $num in
+    1) echo "vlc" ;;
+    2) echo "mpv" ;;
+    3) echo "celluloid" ;;
+    esac
+  done
+}
+
+select_graphics() {
+  echo ""
+  echo "=== Graphics Software ==="
+  echo "1) GIMP"
+  echo "2) Inkscape"
+  echo "3) Krita"
+  echo "4) Blender"
+  echo "0) Skip"
+  echo ""
+  read -p "Select (space-separated): " choice
+
+  for num in $choice; do
+    case $num in
+    1) echo "gimp" ;;
+    2) echo "inkscape" ;;
+    3) echo "krita" ;;
+    4) echo "blender" ;;
+    esac
+  done
+}
+
+select_communication() {
+  echo ""
+  echo "=== Communication ==="
+  echo "1) Discord"
+  echo "2) Telegram"
+  echo "3) Signal"
+  echo "4) Element (Matrix)"
+  echo "0) Skip"
+  echo ""
+  read -p "Select (space-separated): " choice
+
+  for num in $choice; do
+    case $num in
+    1) echo "discord" ;;
+    2) echo "telegram-desktop" ;;
+    3) echo "signal-desktop" ;;
+    4) echo "element-desktop" ;;
+    esac
+  done
+}
+
+select_development() {
+  echo ""
+  echo "=== Development Tools ==="
+  echo "1) Git"
+  echo "2) GitHub CLI"
+  echo "3) Docker"
+  echo "4) Base Development (build tools)"
+  echo "0) Skip"
+  echo ""
+  read -p "Select (space-separated): " choice
+
+  for num in $choice; do
+    case $num in
+    1) echo "git" ;;
+    2) echo "github-cli" ;;
+    3) echo "docker" ;;
+    4) echo "base-devel" ;;
+    esac
+  done
+}
+
+select_productivity() {
+  echo ""
+  echo "=== Productivity ==="
+  echo "1) LibreOffice"
+  echo "2) Thunderbird"
+  echo "3) Obsidian (AUR)"
+  echo "4) Notion (AUR)"
+  echo "0) Skip"
+  echo ""
+  read -p "Select (space-separated): " choice
+
+  for num in $choice; do
+    case $num in
+    1) echo "libreoffice-fresh" ;;
+    2) echo "thunderbird" ;;
+    3) echo "obsidian" ;;
+    4) echo "notion-app" ;;
+    esac
+  done
+}
+
+select_gaming() {
+  echo ""
+  echo "=== Gaming ==="
+  echo "1) Steam"
+  echo "2) Lutris"
+  echo "3) Wine"
+  echo "4) GameMode"
+  echo "0) Skip"
+  echo ""
+  read -p "Select (space-separated): " choice
+
+  for num in $choice; do
+    case $num in
+    1) echo "steam" ;;
+    2) echo "lutris" ;;
+    3) echo "wine" ;;
+    4) echo "gamemode" ;;
+    esac
+  done
+}
+
+select_utilities() {
+  echo ""
+  echo "=== Utilities ==="
+  echo "1) htop"
+  echo "2) btop"
+  echo "3) neofetch"
+  echo "4) fastfetch"
+  echo "5) tmux"
+  echo "0) Skip"
+  echo ""
+  read -p "Select (space-separated): " choice
+
+  for num in $choice; do
+    case $num in
+    1) echo "htop" ;;
+    2) echo "btop" ;;
+    3) echo "neofetch" ;;
+    4) echo "fastfetch" ;;
+    5) echo "tmux" ;;
+    esac
+  done
 }
 
 install_packages() {
@@ -330,64 +429,36 @@ install_custom() {
 
   local all_packages=()
 
-  # Show instructions
   echo ""
-  echo "For each category:"
-  echo "  - Enter numbers separated by spaces (e.g., '1 3 5')"
-  echo "  - Enter 'a' to install all from category"
-  echo "  - Enter '0' to skip category"
+  echo "Select packages from each category"
+  echo "Enter numbers separated by spaces (e.g., '1 3 5')"
+  echo "Enter '0' to skip a category"
   echo ""
   read -p "Press Enter to continue..." dummy
 
-  # Browser selection
-  local browser_pkgs=$(select_from_category "Web Browsers" get_browsers)
-  all_packages+=($browser_pkgs)
-
-  # Terminal selection
-  local terminal_pkgs=$(select_from_category "Terminal Emulators" get_terminals)
-  all_packages+=($terminal_pkgs)
-
-  # Editor selection
-  local editor_pkgs=$(select_from_category "Text Editors" get_editors)
-  all_packages+=($editor_pkgs)
-
-  # File manager selection
-  local fm_pkgs=$(select_from_category "File Managers" get_file_managers)
-  all_packages+=($fm_pkgs)
-
-  # Media player selection
-  local media_pkgs=$(select_from_category "Media Players" get_media_players)
-  all_packages+=($media_pkgs)
-
-  # Graphics selection
-  local graphics_pkgs=$(select_from_category "Graphics Software" get_graphics)
-  all_packages+=($graphics_pkgs)
-
-  # Communication selection
-  local comm_pkgs=$(select_from_category "Communication" get_communication)
-  all_packages+=($comm_pkgs)
-
-  # Development selection
-  local dev_pkgs=$(select_from_category "Development Tools" get_development)
-  all_packages+=($dev_pkgs)
-
-  # Productivity selection
-  local prod_pkgs=$(select_from_category "Productivity" get_productivity)
-  all_packages+=($prod_pkgs)
-
-  # Gaming selection
-  local gaming_pkgs=$(select_from_category "Gaming" get_gaming)
-  all_packages+=($gaming_pkgs)
-
-  # Utilities selection
-  local util_pkgs=$(select_from_category "Utilities" get_utilities)
-  all_packages+=($util_pkgs)
+  # Collect selections from each category
+  all_packages+=($(select_browsers))
+  all_packages+=($(select_terminals))
+  all_packages+=($(select_editors))
+  all_packages+=($(select_file_managers))
+  all_packages+=($(select_media))
+  all_packages+=($(select_graphics))
+  all_packages+=($(select_communication))
+  all_packages+=($(select_development))
+  all_packages+=($(select_productivity))
+  all_packages+=($(select_gaming))
+  all_packages+=($(select_utilities))
 
   # Install all selected packages
   if [ ${#all_packages[@]} -gt 0 ]; then
     echo ""
-    print_info "Selected packages:"
-    printf '  - %s\n' "${all_packages[@]}"
+    print_info "Selected ${#all_packages[@]} package(s):"
+    echo ""
+
+    for pkg in "${all_packages[@]}"; do
+      echo "  - $pkg"
+    done
+
     echo ""
     read -p "Proceed with installation? (Y/n): " -n 1 -r
     echo
