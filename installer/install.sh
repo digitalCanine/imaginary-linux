@@ -1,6 +1,6 @@
 #!/bin/bash
 # Imaginary Linux Installer
-# Version 1.1.14 (Shamshel)
+# Version 1.1.12 (Shamshel)
 # Main installer orchestrator
 
 set -e # Exit on error
@@ -58,7 +58,7 @@ show_banner() {
 ▒                          ▒
 
     IMAGINARY LINUX
-    Version 1.1.14 (Shamshel)
+    Version 1.1.12 (Shamshel)
     
     A transformative Arch-based system
     with guardian philosophy built-in
@@ -221,6 +221,81 @@ main() {
   run_module "60-desktop.sh" "Step 7/10: Desktop Environment" || exit 1
   run_module "70-drivers.sh" "Step 8/10: Hardware Drivers" || exit 1
   run_module "80-packages.sh" "Step 9/10: Optional Software" || exit 1
+
+  # Install basic fastfetch config pointing to Imaginary logo
+  print_step "Installing Fastfetch Configuration"
+
+  mkdir -p /mnt/etc/fastfetch
+
+  cat >/mnt/etc/fastfetch/config.jsonc <<'EOF'
+{
+  "$schema": "https://github.com/fastfetch-cli/fastfetch/raw/dev/doc/json_schema.json",
+  "logo": {
+    "type": "file",
+    "source": "/usr/share/imaginary/logo.txt",
+    "padding": {
+      "top": 1,
+      "right": 4
+    }
+  },
+  "separator": "  ",
+  "keyWidth": 12,
+  "modules": [
+    {
+      "type": "custom",
+      "format": "\u001b[1m\u001b[38;2;225;196;125m✧ IMAGINARY SYSTEM ✧\u001b[0m"
+    },
+    {
+      "type": "os",
+      "key": "\u001b[38;2;225;196;125mVersion\u001b[0m",
+      "format": "{version} · {codename}"
+    },
+    "break",
+    {
+      "type": "os",
+      "key": "\u001b[38;2;119;130;132mOS\u001b[0m",
+      "format": "{name}"
+    },
+    {
+      "type": "kernel",
+      "key": "\u001b[38;2;119;130;132mKernel\u001b[0m"
+    },
+    {
+      "type": "uptime",
+      "key": "\u001b[38;2;119;130;132mUptime\u001b[0m"
+    },
+    "break",
+    {
+      "type": "wm",
+      "key": "\u001b[38;2;90;93;97mWM\u001b[0m"
+    },
+    {
+      "type": "terminal",
+      "key": "\u001b[38;2;90;93;97mTerminal\u001b[0m"
+    },
+    {
+      "type": "shell",
+      "key": "\u001b[38;2;90;93;97mShell\u001b[0m"
+    },
+    "break",
+    {
+      "type": "cpu",
+      "key": "\u001b[38;2;175;185;121mCPU\u001b[0m"
+    },
+    {
+      "type": "memory",
+      "key": "\u001b[38;2;175;185;121mMemory\u001b[0m"
+    },
+    "break",
+    {
+      "type": "custom",
+      "format": "\u001b[38;2;119;130;132m⸻ the system stands, quietly ⸻\u001b[0m"
+    }
+  ]
+}
+EOF
+
+  print_success "Fastfetch configuration installed"
 
   # Finalize installation (includes imaginary-release package)
   run_module "90-finalize.sh" "Step 10/10: Final Configuration" || exit 1
