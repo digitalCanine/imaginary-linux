@@ -204,9 +204,6 @@ Optional security hardening includes:
 ## 📚 Documentation
 
 - [Installation Guide](INSTALL.md) - Detailed installation instructions
-- [Troubleshooting](docs/TROUBLESHOOTING.md) - Common issues and solutions
-- [Customization Guide](docs/CUSTOMIZATION.md) - Personalize your system
-- [Contributing](docs/CONTRIBUTING.md) - Help improve Imaginary Linux
 
 ---
 
