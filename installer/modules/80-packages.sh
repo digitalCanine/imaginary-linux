@@ -38,10 +38,10 @@ select_browsers() {
 
   for num in $choice; do
     case $num in
-    1) echo "firefox" ;;
-    2) echo "chromium" ;;
-    3) echo "brave-bin" ;;
-    4) echo "librewolf-bin" ;;
+    1) SELECTED_PACKAGES+=("firefox") ;;
+    2) SELECTED_PACKAGES+=("chromium") ;;
+    3) SELECTED_PACKAGES+=("brave-bin") ;;
+    4) SELECTED_PACKAGES+=("librewolf-bin") ;;
     esac
   done
 }
@@ -59,10 +59,10 @@ select_terminals() {
 
   for num in $choice; do
     case $num in
-    1) echo "kitty" ;;
-    2) echo "alacritty" ;;
-    3) echo "wezterm" ;;
-    4) echo "foot" ;;
+    1) SELECTED_PACKAGES+=("kitty") ;;
+    2) SELECTED_PACKAGES+=("alacritty") ;;
+    3) SELECTED_PACKAGES+=("wezterm") ;;
+    4) SELECTED_PACKAGES+=("foot") ;;
     esac
   done
 }
@@ -80,10 +80,10 @@ select_editors() {
 
   for num in $choice; do
     case $num in
-    1) echo "neovim" ;;
-    2) echo "vim" ;;
-    3) echo "visual-studio-code-bin" ;;
-    4) echo "vscodium-bin" ;;
+    1) SELECTED_PACKAGES+=("neovim") ;;
+    2) SELECTED_PACKAGES+=("vim") ;;
+    3) SELECTED_PACKAGES+=("visual-studio-code-bin") ;;
+    4) SELECTED_PACKAGES+=("vscodium-bin") ;;
     esac
   done
 }
@@ -102,11 +102,11 @@ select_file_managers() {
 
   for num in $choice; do
     case $num in
-    1) echo "thunar" ;;
-    2) echo "nautilus" ;;
-    3) echo "dolphin" ;;
-    4) echo "ranger" ;;
-    5) echo "nnn" ;;
+    1) SELECTED_PACKAGES+=("thunar") ;;
+    2) SELECTED_PACKAGES+=("nautilus") ;;
+    3) SELECTED_PACKAGES+=("dolphin") ;;
+    4) SELECTED_PACKAGES+=("ranger") ;;
+    5) SELECTED_PACKAGES+=("nnn") ;;
     esac
   done
 }
@@ -123,9 +123,9 @@ select_media() {
 
   for num in $choice; do
     case $num in
-    1) echo "vlc" ;;
-    2) echo "mpv" ;;
-    3) echo "celluloid" ;;
+    1) SELECTED_PACKAGES+=("vlc") ;;
+    2) SELECTED_PACKAGES+=("mpv") ;;
+    3) SELECTED_PACKAGES+=("celluloid") ;;
     esac
   done
 }
@@ -143,10 +143,10 @@ select_graphics() {
 
   for num in $choice; do
     case $num in
-    1) echo "gimp" ;;
-    2) echo "inkscape" ;;
-    3) echo "krita" ;;
-    4) echo "blender" ;;
+    1) SELECTED_PACKAGES+=("gimp") ;;
+    2) SELECTED_PACKAGES+=("inkscape") ;;
+    3) SELECTED_PACKAGES+=("krita") ;;
+    4) SELECTED_PACKAGES+=("blender") ;;
     esac
   done
 }
@@ -164,10 +164,10 @@ select_communication() {
 
   for num in $choice; do
     case $num in
-    1) echo "discord" ;;
-    2) echo "telegram-desktop" ;;
-    3) echo "signal-desktop" ;;
-    4) echo "element-desktop" ;;
+    1) SELECTED_PACKAGES+=("discord") ;;
+    2) SELECTED_PACKAGES+=("telegram-desktop") ;;
+    3) SELECTED_PACKAGES+=("signal-desktop") ;;
+    4) SELECTED_PACKAGES+=("element-desktop") ;;
     esac
   done
 }
@@ -185,10 +185,10 @@ select_development() {
 
   for num in $choice; do
     case $num in
-    1) echo "git" ;;
-    2) echo "github-cli" ;;
-    3) echo "docker" ;;
-    4) echo "base-devel" ;;
+    1) SELECTED_PACKAGES+=("git") ;;
+    2) SELECTED_PACKAGES+=("github-cli") ;;
+    3) SELECTED_PACKAGES+=("docker") ;;
+    4) SELECTED_PACKAGES+=("base-devel") ;;
     esac
   done
 }
@@ -206,10 +206,10 @@ select_productivity() {
 
   for num in $choice; do
     case $num in
-    1) echo "libreoffice-fresh" ;;
-    2) echo "thunderbird" ;;
-    3) echo "obsidian" ;;
-    4) echo "notion-app" ;;
+    1) SELECTED_PACKAGES+=("libreoffice-fresh") ;;
+    2) SELECTED_PACKAGES+=("thunderbird") ;;
+    3) SELECTED_PACKAGES+=("obsidian") ;;
+    4) SELECTED_PACKAGES+=("notion-app") ;;
     esac
   done
 }
@@ -227,10 +227,10 @@ select_gaming() {
 
   for num in $choice; do
     case $num in
-    1) echo "steam" ;;
-    2) echo "lutris" ;;
-    3) echo "wine" ;;
-    4) echo "gamemode" ;;
+    1) SELECTED_PACKAGES+=("steam") ;;
+    2) SELECTED_PACKAGES+=("lutris") ;;
+    3) SELECTED_PACKAGES+=("wine") ;;
+    4) SELECTED_PACKAGES+=("gamemode") ;;
     esac
   done
 }
@@ -249,11 +249,11 @@ select_utilities() {
 
   for num in $choice; do
     case $num in
-    1) echo "htop" ;;
-    2) echo "btop" ;;
-    3) echo "neofetch" ;;
-    4) echo "fastfetch" ;;
-    5) echo "tmux" ;;
+    1) SELECTED_PACKAGES+=("htop") ;;
+    2) SELECTED_PACKAGES+=("btop") ;;
+    3) SELECTED_PACKAGES+=("neofetch") ;;
+    4) SELECTED_PACKAGES+=("fastfetch") ;;
+    5) SELECTED_PACKAGES+=("tmux") ;;
     esac
   done
 }
@@ -427,7 +427,8 @@ install_full() {
 install_custom() {
   print_info "Custom package selection..."
 
-  local all_packages=()
+  # Initialize global array
+  SELECTED_PACKAGES=()
 
   echo ""
   echo "Select packages from each category"
@@ -436,26 +437,26 @@ install_custom() {
   echo ""
   read -p "Press Enter to continue..." dummy
 
-  # Collect selections from each category
-  all_packages+=($(select_browsers))
-  all_packages+=($(select_terminals))
-  all_packages+=($(select_editors))
-  all_packages+=($(select_file_managers))
-  all_packages+=($(select_media))
-  all_packages+=($(select_graphics))
-  all_packages+=($(select_communication))
-  all_packages+=($(select_development))
-  all_packages+=($(select_productivity))
-  all_packages+=($(select_gaming))
-  all_packages+=($(select_utilities))
+  # Call each selection function (they append to SELECTED_PACKAGES)
+  select_browsers
+  select_terminals
+  select_editors
+  select_file_managers
+  select_media
+  select_graphics
+  select_communication
+  select_development
+  select_productivity
+  select_gaming
+  select_utilities
 
   # Install all selected packages
-  if [ ${#all_packages[@]} -gt 0 ]; then
+  if [ ${#SELECTED_PACKAGES[@]} -gt 0 ]; then
     echo ""
-    print_info "Selected ${#all_packages[@]} package(s):"
+    print_info "Selected ${#SELECTED_PACKAGES[@]} package(s):"
     echo ""
 
-    for pkg in "${all_packages[@]}"; do
+    for pkg in "${SELECTED_PACKAGES[@]}"; do
       echo "  - $pkg"
     done
 
@@ -464,7 +465,7 @@ install_custom() {
     echo
 
     if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-      install_packages "${all_packages[@]}"
+      install_packages "${SELECTED_PACKAGES[@]}"
     else
       print_info "Package installation cancelled"
     fi
