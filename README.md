@@ -12,12 +12,14 @@
        IMAGINARY LINUX
 ```
 
-**Version 1.1.16 (Shamshel)**  
+`The system stands, quietly.`
+
+**Version 1.1.17 (Shamshel)**  
 *A git-based, security-focused Arch Linux distribution*
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Arch Linux](https://img.shields.io/badge/Based%20on-Arch%20Linux-1793D1?logo=arch-linux)](https://archlinux.org/)
-[![Version](https://img.shields.io/badge/version-1.1.16-blue)](https://github.com/digitalcanine/imaginary-linux/releases)
+[![Version](https://img.shields.io/badge/version-1.1.17-blue)](https://github.com/digitalcanine/imaginary-linux/releases)
 
 ---
 
@@ -265,7 +267,7 @@ Optional security hardening includes:
 
 ## Version History & Roadmap
 
-### Current: Version 1.1.16 (Shamshel)
+### Current: Version 1.1.17 (Shamshel)
 
 - Git-based installer delivery
 - Automated CLI installation

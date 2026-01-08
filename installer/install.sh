@@ -1,6 +1,6 @@
 #!/bin/bash
 # Imaginary Linux Installer
-# Version 1.1.16 (Shamshel)
+# Version 1.1.17 (Shamshel)
 # Main installer orchestrator
 
 set -e # Exit on error
@@ -58,8 +58,9 @@ show_banner() {
 ▒                          ▒
 
     IMAGINARY LINUX
-    Version 1.1.16 (Shamshel)
+    Version 1.1.17 (Shamshel)
     
+    The system stands, quietly.
     A transformative Arch-based system
     with guardian philosophy built-in
 EOF
@@ -185,6 +186,7 @@ show_completion() {
 
     INSTALLATION COMPLETE!
     
+    The system stands, quietly.
     Imaginary Linux 1.1.12 (Shamshel)
     has been successfully installed.
 EOF
