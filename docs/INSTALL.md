@@ -103,6 +103,7 @@ This guide will walk you through installing Imaginary Linux on your system.
 6. **Run installer**
 
    ```bash
+   chmod +x ./installer/install.sh
    sudo ./installer/install.sh
    ```
 
