@@ -138,28 +138,6 @@ configure_vconsole() {
   fi
 }
 
-enable_multilib() {
-  print_info "Checking multilib repository..."
-
-  # Check if system is 64-bit
-  if [ "$(uname -m)" = "x86_64" ]; then
-    echo ""
-    read -p "Enable multilib repository (32-bit support)? Recommended for gaming. (Y/n): " -n 1 -r
-    echo
-
-    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-      print_info "Enabling multilib repository..."
-      arch-chroot /mnt sed -i '/^#\[multilib\]/,+1 s/^#//' /etc/pacman.conf
-      arch-chroot /mnt pacman -Sy
-      print_success "Multilib repository enabled"
-    else
-      print_info "Multilib repository not enabled"
-    fi
-  else
-    print_info "System is not 64-bit, skipping multilib"
-  fi
-}
-
 configure_pacman() {
   print_info "Configuring pacman..."
 
@@ -801,7 +779,6 @@ main() {
   configure_locale
   configure_timezone
   configure_vconsole
-  enable_multilib
   configure_pacman
   setup_imaginary_repo
   install_imaginary_release

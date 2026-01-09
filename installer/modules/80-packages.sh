@@ -25,6 +25,28 @@ print_warning() {
   echo -e "${YELLOW}[WARNING]${NC} $1"
 }
 
+enable_multilib() {
+  print_info "Checking multilib repository..."
+
+  # Check if system is 64-bit
+  if [ "$(uname -m)" = "x86_64" ]; then
+    echo ""
+    read -p "Enable multilib repository (32-bit support)? Recommended for gaming. (Y/n): " -n 1 -r
+    echo
+
+    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
+      print_info "Enabling multilib repository..."
+      arch-chroot /mnt sed -i '/^#\[multilib\]/,+1 s/^#//' /etc/pacman.conf
+      arch-chroot /mnt pacman -Sy
+      print_success "Multilib repository enabled"
+    else
+      print_info "Multilib repository not enabled"
+    fi
+  else
+    print_info "System is not 64-bit, skipping multilib"
+  fi
+}
+
 select_browsers() {
   echo ""
   echo "=== Web Browsers ==="
@@ -237,6 +259,27 @@ select_utilities() {
   done
 }
 
+select_gaming() {
+  echo ""
+  echo "=== Utilities ==="
+  echo "1) Steam"
+  echo "2) Wine"
+  echo "3) Lutris"
+  echo "4) Gamescope"
+  echo "0) Skip"
+  echo ""
+  read -p "Select (space-separated): " choice
+
+  for num in $choice; do
+    case $num in
+    1) SELECTED_PACKAGES+=("steam") ;;
+    2) SELECTED_PACKAGES+=("wine") ;;
+    3) SELECTED_PACKAGES+=("lutris") ;;
+    4) SELECTED_PACKAGES+=("gamescope") ;;
+    esac
+  done
+}
+
 install_packages() {
   local packages=("$@")
 
@@ -417,6 +460,7 @@ install_custom() {
   read -p "Press Enter to continue..." dummy
 
   # Call each selection function (they append to SELECTED_PACKAGES)
+  enable_multilib
   select_browsers
   select_terminals
   select_editors
@@ -427,6 +471,7 @@ install_custom() {
   select_development
   select_productivity
   select_utilities
+  select_gaming
 
   # Install all selected packages
   if [ ${#SELECTED_PACKAGES[@]} -gt 0 ]; then
