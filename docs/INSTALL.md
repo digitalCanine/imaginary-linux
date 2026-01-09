@@ -411,9 +411,8 @@ The Arch User Repository (AUR) contains community-maintained packages. An AUR he
    - Plus: Development (Docker, base-devel)
    - Plus: Additional utilities
 
-4. **Custom Selection** *(Currently disabled)*
-   - Pick individual packages
-   - Will be re-enabled in future release
+4. **Custom Selection**
+   - Pick individual packages (Web browser, terminal, text editor, file manager, media players, graphical editors, communication, development utilities, productivity, others, and gaming)
 
 **Categories available:**
 
