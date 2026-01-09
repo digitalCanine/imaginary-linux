@@ -93,6 +93,8 @@ This guide will walk you through installing Imaginary Linux on your system.
    ping -c 3 archlinux.org
    ```
 
+  **If you can't use iwd for any reason, visit [the old imaginary-linux iso](https://github.com/digitalcanine/outdated-imaginary-linux) just make sure to follow the installation guide that is in THIS document and not the one that is in the iso. The iso is very outdated, however it does contain NetworkManager which is easier to use than iwd.**
+
 5. **Clone Imaginary Linux**
 
    ```bash
