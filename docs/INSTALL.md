@@ -412,7 +412,7 @@ The Arch User Repository (AUR) contains community-maintained packages. An AUR he
    - Plus: Additional utilities
 
 4. **Custom Selection**
-   - Pick individual packages (Web browser, terminal, text editor, file manager, media players, graphical editors, communication, development utilities, productivity, others, and gaming)
+   - Pick individual packages
 
 **Categories available:**
 
