@@ -560,7 +560,7 @@ uname -r
 
 ```
 NAME="Imaginary Linux"
-VERSION="1.1.16"
+VERSION="1.1.17"
 VERSION_CODENAME=shamshel
 ID=imaginary
 ID_LIKE=arch
