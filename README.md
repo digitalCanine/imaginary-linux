@@ -285,7 +285,6 @@ Planned features for the next major release:
 - [ ] imaginary-angel 2.0 with enhanced features
 - [ ] Advanced security hardening options
 - [ ] Expanded angelic theming
-- [ ] Non-destructive installation (preserve existing partitions)
 - [ ] LUKS encryption during installation
 - [ ] Minimal ISO with git-based updater
 
