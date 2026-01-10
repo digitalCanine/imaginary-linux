@@ -399,3 +399,9 @@ Imaginary Linux is provided as-is without warranty. This is a community project 
 - ❌ Want graphical installers only
 - ❌ Prefer stable (non-rolling) releases
 - ❌ Need Secure Boot support (not yet implemented)
+
+---
+
+## Follow the devlog
+
+Anyone can follow the devlogs [here](https://digitalcanine.neocities.org/projects.html?project=imaginary-linux)
