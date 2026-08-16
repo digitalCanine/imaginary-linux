@@ -287,6 +287,7 @@ Planned features for the next major release:
 - [ ] Expanded angelic theming
 - [ ] LUKS encryption during installation
 - [ ] Minimal ISO with git-based updater
+- [ ] Access to different init systems during the install process
 
 ### Version History
 

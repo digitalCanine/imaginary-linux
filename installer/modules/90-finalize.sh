@@ -460,7 +460,7 @@ harden_system() {
   echo "kernel.kptr_restrict = 2" >>/mnt/etc/sysctl.d/51-kptr-restrict.conf
 
   # 3. Disable kernel module loading after boot
-  read -p "Disable kernel module loading after boot? (recommended for servers) (y/N): " -n 1 -r
+  read -p "Disable kernel module loading after boot? (recommended for servers, if you are NOT a server user you should press N) (y/N): " -n 1 -r
   echo
   if [[ $REPLY =~ ^[Yy]$ ]]; then
     echo "kernel.modules_disabled = 1" >>/mnt/etc/sysctl.d/51-modules-disabled.conf
