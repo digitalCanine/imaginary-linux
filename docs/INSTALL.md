@@ -111,17 +111,7 @@ This guide will walk you through installing Imaginary Linux on your system.
 
 7. **Follow the prompts** - See [Installation Process](#installation-process) below
 
-### Method 2: Quick Install (One-liner)
 
-If you're comfortable with running remote scripts:
-
-```bash
-curl -sL https://raw.githubusercontent.com/digitalcanine/imaginary-linux/main/quick-install.sh | sudo bash
-```
-
-This automatically clones the repository and runs the installer.
-
----
 
 ## Installation Process
 
