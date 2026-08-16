@@ -155,13 +155,6 @@ Imaginary Linux is an unconventional, git-based Arch distribution with a guardia
 
 5. **Reboot into your new Imaginary Linux system**
 
-### Alternative: Quick Install
-
-For those who prefer a one-liner:
-
-```bash
-curl -sL https://raw.githubusercontent.com/digitalcanine/imaginary-linux/main/quick-install.sh | sudo bash
-```
 
 See [INSTALL.md](./docs/INSTALL.md) for detailed installation instructions.
 
@@ -339,8 +332,6 @@ Contributions are welcome! Whether it's:
 - New desktop environment profiles
 - Security enhancements
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) for guidelines.
-
 ---
 
 ## License
@@ -401,8 +392,3 @@ Imaginary Linux is provided as-is without warranty. This is a community project 
 - ❌ Prefer stable (non-rolling) releases
 - ❌ Need Secure Boot support (not yet implemented)
 
----
-
-## Follow the devlog
-
-Anyone can follow the devlogs [here](https://digitalcanine.neocities.org/projects.html?project=imaginary-linux)
