@@ -17,7 +17,7 @@
 **Version 1.1.17 (Shamshel)**  
 *A git-based, security-focused Arch Linux distribution*
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![License: MIT + Commons Clause](https://img.shields.io/badge/License-MIT%20%2B%20Commons%20Clause-blue.svg)](LICENSE)
 [![Arch Linux](https://img.shields.io/badge/Based%20on-Arch%20Linux-1793D1?logo=arch-linux)](https://archlinux.org/)
 [![Version](https://img.shields.io/badge/version-1.1.17-blue)](https://github.com/digitalcanine/imaginary-linux/releases)
 
@@ -336,9 +336,9 @@ Contributions are welcome! Whether it's:
 
 ## License
 
-Imaginary Linux is released under the MIT License. See [LICENSE](LICENSE) for details.
+Imaginary Linux is released under the MIT License with the Commons Clause, which means it is free to use, modify and share, but not to sell. See [LICENSE](LICENSE) for details.
 
-The installer scripts and configurations are MIT licensed.  
+The installer scripts and configurations are under the same license.  
 The Linux kernel and included packages retain their original licenses.
 
 ---

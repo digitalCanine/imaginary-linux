@@ -330,273 +330,53 @@ install_aur_helper() {
   fi
 }
 
-configure_firewall() {
-  echo ""
-  read -p "Enable firewall (UFW)? Recommended for security. (Y/n): " -n 1 -r
-  echo
-
-  if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-    print_info "Installing and configuring firewall..."
-
-    arch-chroot /mnt pacman -S --noconfirm ufw
-
-    # Enable and configure UFW
-    arch-chroot /mnt ufw --force default deny incoming
-    arch-chroot /mnt ufw --force default allow outgoing
-    arch-chroot /mnt ufw --force enable
-    arch-chroot /mnt systemctl enable ufw.service
-
-    print_success "Firewall enabled and configured"
-  else
-    print_info "Firewall not enabled"
-  fi
-}
-
-configure_apparmor() {
-  echo ""
-  print_info "AppArmor - Mandatory Access Control"
-  echo ""
-  print_info "AppArmor provides:"
-  print_info "  • Application confinement and sandboxing"
-  print_info "  • Protection against zero-day exploits"
-  print_info "  • Fine-grained access control"
-  print_info "  • Security profiles for system services"
-  echo ""
-
-  read -p "Install and enable AppArmor? (Y/n): " -n 1 -r
-  echo
-
-  if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-    print_info "Installing AppArmor..."
-    arch-chroot /mnt pacman -S --noconfirm apparmor
-
-    print_info "Enabling AppArmor service..."
-    arch-chroot /mnt systemctl enable apparmor.service
-
-    print_success "AppArmor installed and enabled"
-
-    echo ""
-    print_warning "Important: AppArmor requires kernel parameters"
-    print_info "The bootloader needs: apparmor=1 security=apparmor"
-    echo ""
-
-    read -p "Add AppArmor kernel parameters to bootloader? (Y/n): " -n 1 -r
-    echo
-
-    if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-      # Detect bootloader and add parameters
-      if [ -f /mnt/boot/loader/entries/*.conf ]; then
-        # systemd-boot
-        print_info "Detected systemd-boot, adding parameters..."
-
-        for entry in /mnt/boot/loader/entries/*.conf; do
-          if grep -q "^options" "$entry"; then
-            # Add to existing options line
-            sed -i 's/^options \(.*\)/options \1 apparmor=1 security=apparmor/' "$entry"
-          else
-            # Add new options line
-            echo "options apparmor=1 security=apparmor" >>"$entry"
-          fi
-        done
-
-        print_success "AppArmor parameters added to systemd-boot"
-
-      elif [ -f /mnt/boot/grub/grub.cfg ]; then
-        # GRUB
-        print_info "Detected GRUB, updating configuration..."
-
-        # Add to GRUB_CMDLINE_LINUX_DEFAULT
-        if grep -q "^GRUB_CMDLINE_LINUX_DEFAULT=" /mnt/etc/default/grub; then
-          sed -i 's/^GRUB_CMDLINE_LINUX_DEFAULT="\(.*\)"/GRUB_CMDLINE_LINUX_DEFAULT="\1 apparmor=1 security=apparmor"/' /mnt/etc/default/grub
-        else
-          echo 'GRUB_CMDLINE_LINUX_DEFAULT="apparmor=1 security=apparmor"' >>/mnt/etc/default/grub
-        fi
-
-        # Regenerate GRUB config
-        arch-chroot /mnt grub-mkconfig -o /boot/grub/grub.cfg
-
-        print_success "AppArmor parameters added to GRUB"
-      else
-        print_warning "Could not detect bootloader automatically"
-        print_info "Please add these kernel parameters manually:"
-        print_info "  apparmor=1 security=apparmor"
-      fi
-    else
-      print_warning "AppArmor installed but not configured in bootloader"
-      print_info "Add these kernel parameters to enable:"
-      print_info "  apparmor=1 security=apparmor"
-    fi
-  else
-    print_info "AppArmor not installed"
-  fi
-}
-
 harden_system() {
   echo ""
   echo -e "${BLUE}╔═══════════════════════════════════════════╗${NC}"
-  echo -e "${BLUE}║       System Security Hardening          ║${NC}"
+  echo -e "${BLUE}║       System Security Hardening           ║${NC}"
   echo -e "${BLUE}╚═══════════════════════════════════════════╝${NC}"
   echo ""
 
-  print_info "Optional security hardening measures"
-  echo "This will apply various security improvements to your system."
+  # The hardening itself lives in imaginary-angel, so a fresh install and an
+  # angel-updated system get exactly the same configuration
+  local harden_script="/usr/share/imaginary-angel/hardening/harden.sh"
+
+  if [ ! -f "/mnt${harden_script}" ]; then
+    print_warning "Imaginary Angel is not installed, so hardening cannot be applied"
+    print_info "After rebooting, install it and run the hardening script:"
+    print_info "  sudo pacman -S imaginary-angel"
+    print_info "  sudo ${harden_script}"
+    return 0
+  fi
+
+  print_info "Applies: firewall (UFW), AppArmor, kernel and network hardening,"
+  print_info "SSH hardening, core dumps off, su limited to the wheel group"
   echo ""
 
   read -p "Apply security hardening? (Y/n): " -n 1 -r
   echo
-
   if [[ $REPLY =~ ^[Nn]$ ]]; then
     print_info "Skipping system hardening"
+    print_info "You can apply it later with: sudo ${harden_script}"
     return 0
   fi
 
+  local lock_modules=false
+  read -p "Disable kernel module loading after boot? (servers only, desktop users press N) (y/N): " -n 1 -r
+  echo
+  [[ $REPLY =~ ^[Yy]$ ]] && lock_modules=true
+
   print_info "Applying system hardening..."
-
-  # 1. Restrict access to kernel logs
-  print_info "Restricting kernel log access..."
-  echo "kernel.dmesg_restrict = 1" >>/mnt/etc/sysctl.d/51-dmesg-restrict.conf
-
-  # 2. Restrict access to kernel pointers
-  echo "kernel.kptr_restrict = 2" >>/mnt/etc/sysctl.d/51-kptr-restrict.conf
-
-  # 3. Disable kernel module loading after boot
-  read -p "Disable kernel module loading after boot? (recommended for servers, if you are NOT a server user you should press N) (y/N): " -n 1 -r
-  echo
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
-    echo "kernel.modules_disabled = 1" >>/mnt/etc/sysctl.d/51-modules-disabled.conf
-    print_success "Kernel module loading will be disabled after boot"
+  if arch-chroot /mnt env HARDEN_LOCK_MODULES="$lock_modules" bash "$harden_script"; then
+    print_success "System hardening complete!"
+  else
+    print_warning "Hardening finished with errors (see above); the system will still boot"
+    print_info "Re-run it after rebooting with: sudo ${harden_script}"
   fi
-
-  # 4. Enable ASLR
-  print_info "Enabling full ASLR..."
-  echo "kernel.randomize_va_space = 2" >>/mnt/etc/sysctl.d/51-aslr.conf
-
-  # 5. Restrict ptrace
-  print_info "Restricting ptrace..."
-  echo "kernel.yama.ptrace_scope = 2" >>/mnt/etc/sysctl.d/51-ptrace.conf
-
-  # 6. Disable core dumps
-  read -p "Disable core dumps? (recommended for security) (Y/n): " -n 1 -r
-  echo
-  if [[ ! $REPLY =~ ^[Nn]$ ]]; then
-    echo "kernel.core_pattern = |/bin/false" >>/mnt/etc/sysctl.d/51-coredump.conf
-    echo "* hard core 0" >>/mnt/etc/security/limits.conf
-    print_success "Core dumps disabled"
-  fi
-
-  # 7. Restrict su access to wheel group
-  print_info "Restricting su to wheel group..."
-  echo "auth required pam_wheel.so use_uid" >>/mnt/etc/pam.d/su
-
-  # 8. Set secure umask
-  print_info "Setting secure umask..."
-  sed -i 's/umask 022/umask 077/' /mnt/etc/profile 2>/dev/null || echo "umask 077" >>/mnt/etc/profile
-
-  # 9. Disable unused filesystems
-  print_info "Disabling unused filesystems..."
-  cat >>/mnt/etc/modprobe.d/blacklist-filesystems.conf <<'EOF'
-# Disable uncommon filesystems
-install cramfs /bin/false
-install freevxfs /bin/false
-install jffs2 /bin/false
-install hfs /bin/false
-install hfsplus /bin/false
-install udf /bin/false
-EOF
-
-  # 10. Harden SSH if installed
-  if arch-chroot /mnt pacman -Q openssh &>/dev/null; then
-    print_info "Hardening SSH configuration..."
-
-    # Backup original
-    cp /mnt/etc/ssh/sshd_config /mnt/etc/ssh/sshd_config.backup
-
-    # Apply hardening
-    cat >>/mnt/etc/ssh/sshd_config.d/hardening.conf <<'EOF'
-# Security hardening
-PermitRootLogin no
-PasswordAuthentication yes
-PubkeyAuthentication yes
-ChallengeResponseAuthentication no
-UsePAM yes
-X11Forwarding no
-PrintMotd no
-MaxAuthTries 3
-MaxSessions 2
-ClientAliveInterval 300
-ClientAliveCountMax 2
-Protocol 2
-EOF
-    print_success "SSH hardened"
-  fi
-
-  # 11. Systemd hardening
-  print_info "Applying systemd security settings..."
-
-  # Restrict coredumps in systemd
-  mkdir -p /mnt/etc/systemd/coredump.conf.d
-  cat >/mnt/etc/systemd/coredump.conf.d/disable.conf <<'EOF'
-[Coredump]
-Storage=none
-ProcessSizeMax=0
-EOF
-
-  # Harden systemd-resolved if used
-  mkdir -p /mnt/etc/systemd/resolved.conf.d
-  cat >/mnt/etc/systemd/resolved.conf.d/hardening.conf <<'EOF'
-[Resolve]
-DNSSEC=yes
-DNSOverTLS=opportunistic
-EOF
-
-  # 12. Set secure file permissions
-  print_info "Setting secure file permissions..."
-
-  # Protect sensitive files
-  arch-chroot /mnt chmod 700 /root
-  arch-chroot /mnt chmod 700 /home/*/.ssh 2>/dev/null || true
-  arch-chroot /mnt chmod 600 /etc/ssh/*_key 2>/dev/null || true
-
-  # 13. Enable automatic security updates (optional)
-  read -p "Enable automatic security updates? (y/N): " -n 1 -r
-  echo
-  if [[ $REPLY =~ ^[Yy]$ ]]; then
-    # Install and enable systemd timer for updates
-    cat >/mnt/etc/systemd/system/update-system.service <<'EOF'
-[Unit]
-Description=Update system packages
-After=network-online.target
-
-[Service]
-Type=oneshot
-ExecStart=/usr/bin/pacman -Syu --noconfirm
-EOF
-
-    cat >/mnt/etc/systemd/system/update-system.timer <<'EOF'
-[Unit]
-Description=Daily system update
-
-[Timer]
-OnCalendar=daily
-Persistent=true
-
-[Install]
-WantedBy=timers.target
-EOF
-
-    arch-chroot /mnt systemctl enable update-system.timer
-    print_success "Automatic updates enabled (daily)"
-  fi
-
-  print_success "System hardening complete!"
 
   echo ""
-  print_warning "Important Notes:"
-  echo "  - Core dumps are disabled for security"
-  echo "  - SSH root login is disabled (use sudo)"
-  echo "  - Default umask is now 077 (more restrictive)"
-  echo "  - Review /etc/sysctl.d/ for kernel parameters"
-  echo ""
+  print_info "Hardening settings live in /etc/imaginary-angel.conf"
+  print_info "Imaginary Angel can re-apply or update them at any time"
 }
 
 enable_systemd_services() {
@@ -784,8 +564,6 @@ main() {
   install_imaginary_release
   install_imaginary_angel
   install_aur_helper
-  configure_firewall
-  configure_apparmor
   harden_system
   enable_systemd_services
   create_swap_file
