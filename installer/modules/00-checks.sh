@@ -76,12 +76,17 @@ check_boot_mode() {
   if [ -d /sys/firmware/efi/efivars ]; then
     export BOOT_MODE="UEFI"
     print_success "UEFI environment confirmed"
-  else
-    export BOOT_MODE="BIOS"
-    print_success "BIOS environment confirmed"
+    return 0
   fi
 
-  return 0
+  # The bootloader module installs systemd-boot, which only works on UEFI.
+  # Stop here, before any disk is touched, instead of failing at step 5.
+  export BOOT_MODE="BIOS"
+  print_error "BIOS (legacy) boot detected"
+  print_info "This version of Imaginary Linux requires UEFI"
+  print_info "Enable UEFI in your firmware settings (or in your VM's settings)"
+  print_info "and boot the ISO again"
+  return 1
 }
 
 check_disk_space() {
@@ -246,6 +251,7 @@ main() {
   check_root || checks_passed=false
   check_arch_iso || checks_passed=false
   check_internet || checks_passed=false
+  check_boot_mode || checks_passed=false
 
   if [ "$checks_passed" = false ]; then
     echo ""
@@ -254,7 +260,6 @@ main() {
   fi
 
   # Information gathering checks (non-critical)
-  check_boot_mode
   check_disk_space
   check_memory
   check_virtualization

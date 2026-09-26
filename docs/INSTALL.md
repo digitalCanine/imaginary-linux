@@ -1,6 +1,6 @@
 # Imaginary Linux Installation Guide
 
-**Version 1.1.17 (Shamshel)**
+**Version 1.9.0 (Shamshel)**
 
 This guide will walk you through installing Imaginary Linux on your system.
 
@@ -28,7 +28,7 @@ This guide will walk you through installing Imaginary Linux on your system.
 
 1. **Backup your data** - Installation can erase data
 2. **Check BIOS settings** - Disable Secure Boot (not yet supported)
-3. **Verify boot mode** - UEFI or BIOS (installer auto-detects)
+3. **Verify boot mode** - UEFI is required; the installer stops if the ISO was booted in BIOS/legacy mode (in a VM, enable UEFI/EFI firmware)
 4. **Have network credentials ready** - WiFi password, etc.
 
 ---
@@ -139,19 +139,10 @@ The installer automatically detects:
 
 **Auto partitioning schemes:**
 
-**UEFI System:**
-
 ```
 /dev/sda1  512MB   FAT32   /boot (EFI System Partition)
 /dev/sda2  [SWAP]  swap    swap (if swap partition selected)
 /dev/sda3  Rest    ext4    / (root)
-```
-
-**BIOS System:**
-
-```
-/dev/sda1  [SWAP]  swap    swap (if swap partition selected)
-/dev/sda2  Rest    ext4    / (root, bootable)
 ```
 
 **Additional Disks:**
@@ -244,32 +235,15 @@ Choose your Linux kernel:
 
 ### 6. Bootloader Installation
 
-**UEFI Systems:**
-
-Choose between:
-
-1. **systemd-boot** (recommended)
-   - Simple, fast
-   - Native UEFI bootloader
-   - Easy to configure
-   - Best for single-OS installs
-
-2. **GRUB**
-   - More features
-   - Better dual-boot support
-   - Theme customization
-   - Works with older hardware
-
-**BIOS Systems:**
-
-- **GRUB** (only option for BIOS)
+The installer sets up **systemd-boot**, a simple and fast native UEFI
+bootloader. BIOS/legacy boot is not supported in this version.
 
 **Boot options:**
 
 You can add custom kernel parameters such as:
 
 - `quiet` - Hide boot messages
-- `apparmor=1 security=apparmor` - Enable AppArmor
+- `lsm=landlock,lockdown,yama,integrity,apparmor,bpf` - Enable AppArmor (the hardening step adds this for you)
 - `nvidia-drm.modeset=1` - Enable NVIDIA DRM
 - `mitigations=off` - Disable CPU vulnerability mitigations (performance vs security)
 
@@ -553,7 +527,7 @@ uname -r
 
 ```
 NAME="Imaginary Linux"
-VERSION="1.1.17"
+VERSION="1.9.0"
 VERSION_CODENAME=shamshel
 ID=imaginary
 ID_LIKE=arch
@@ -627,13 +601,19 @@ sudo pacman -S imaginary-release imaginary-angel
 sudo imaginary-release
 ```
 
-**Enable automatic updates (optional):**
+**Apply or update system hardening:**
 
-The installer can enable daily automatic updates via systemd timer. Check status:
+The installer hardens the system with imaginary-angel's hardening script. After
+updating imaginary-angel, run it again to pick up new hardening (it is safe to
+re-run, and only changes what differs):
 
 ```bash
-systemctl status update-system.timer
+sudo /usr/share/imaginary-angel/hardening/harden.sh
 ```
+
+Settings are in `/etc/imaginary-angel.conf` (`HARDEN_*`). Files it writes are
+listed in `/var/lib/imaginary-angel/hardening/manifest`, with backups of any
+file it edited in `/var/lib/imaginary-angel/hardening/backup/`.
 
 ### Recommended First Steps
 

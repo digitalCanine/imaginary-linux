@@ -1,6 +1,6 @@
 #!/bin/bash
 # Imaginary Linux Installer
-# Version 1.1.17 (Shamshel)
+# Version 1.9.0 (Shamshel)
 # Main installer orchestrator
 
 set -e # Exit on error
@@ -58,7 +58,7 @@ show_banner() {
 ▒                          ▒
 
     IMAGINARY LINUX
-    Version 1.1.17 (Shamshel)
+    Version 1.9.0 (Shamshel)
     
     The system stands, quietly.
     A transformative Arch-based system

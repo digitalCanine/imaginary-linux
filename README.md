@@ -14,12 +14,12 @@
 
 `The system stands, quietly.`
 
-**Version 1.1.17 (Shamshel)**  
+**Version 1.9.0 (Shamshel)**  
 *A git-based, security-focused Arch Linux distribution*
 
 [![License: MIT + Commons Clause](https://img.shields.io/badge/License-MIT%20%2B%20Commons%20Clause-blue.svg)](LICENSE)
 [![Arch Linux](https://img.shields.io/badge/Based%20on-Arch%20Linux-1793D1?logo=arch-linux)](https://archlinux.org/)
-[![Version](https://img.shields.io/badge/version-1.1.17-blue)](https://github.com/digitalcanine/imaginary-linux/releases)
+[![Version](https://img.shields.io/badge/version-1.9.0-blue)](https://github.com/digitalcanine/imaginary-linux/releases)
 
 ---
 
@@ -234,20 +234,23 @@ The guardian philosophy means your system isn't just installed—it's protected 
 
 ### System Hardening
 
-Optional security hardening includes:
+Hardening is applied by imaginary-angel's hardening script, which the installer
+runs on the new system. Any system with imaginary-angel can run the same script
+to get the same hardening, or to update it later.
 
-- Kernel parameter hardening (dmesg_restrict, kptr_restrict, ASLR)
-- Restricted ptrace access
+- Firewall (UFW: deny incoming, allow outgoing)
+- AppArmor enabled at boot
+- Kernel and network parameter hardening (kernel pointer and log restrictions,
+  ASLR, kexec disabled, ICMP redirect and source-routing protection)
+- Rarely used filesystems and network protocols blocked
 - Core dump disabling
-- Secure umask (077)
-- SSH hardening
-- Systemd security settings
-- Automatic security updates (optional)
+- SSH hardening (no root login, no empty passwords)
+- su restricted to the wheel group
+- Optional strict mode (`HARDEN_STRICT=true` in `/etc/imaginary-angel.conf`)
 
-### Bootloader Options
+### Bootloader
 
-- **systemd-boot** (UEFI, recommended)
-- **GRUB** (UEFI and BIOS)
+- **systemd-boot** (UEFI only; BIOS/legacy boot is not supported in this version)
 
 ### Partition Schemes
 
@@ -260,13 +263,13 @@ Optional security hardening includes:
 
 ## Version History & Roadmap
 
-### Current: Version 1.1.17 (Shamshel)
+### Current: Version 1.9.0 (Shamshel)
 
 - Git-based installer delivery
 - Automated CLI installation
 - 7 desktop environment options
 - Security hardening features
-- UEFI and BIOS support
+- UEFI systems (BIOS/legacy boot is not supported)
 - imaginary-angel system guardian
 - Custom package repository
 
